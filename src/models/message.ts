@@ -5,7 +5,7 @@ import { ChatMessage } from '../types';
 
 export interface Msg {
   content: string;
-  userId: ObjectId;
+  userId: string;
   roomId: string;
 }
 
@@ -20,7 +20,7 @@ const messageSchema = new Schema<Msg, MessageModelStaticMethods>(
       type: String,
       required: true,
     },
-    userId: { type: ObjectId, required: true },
+    userId: { type: String, required: true },
     roomId: {
       type: String,
       required: true,

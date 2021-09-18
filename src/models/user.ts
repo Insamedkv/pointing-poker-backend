@@ -7,7 +7,7 @@ export interface User {
   position?: string,
   avatar?: string,
   cloudinary_id?: string,
-  role: string,
+  asObserver: boolean,
 }
 
 export interface UserModelStaticMethods extends Model<User> {
@@ -23,7 +23,7 @@ const userSchema = new Schema<UserModelStaticMethods>(
     position: { type: String },
     avatar: { type: String },
     cloudinary_id: { type: String },
-    role: { type: String, required: true },
+    asObserver: { type: Boolean, required: true },
   },
   { timestamps: true },
 );

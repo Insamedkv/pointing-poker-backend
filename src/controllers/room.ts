@@ -48,7 +48,7 @@ export const onDeleteRoomIssue = async (req: Request, res: Response) => {
   try {
     await RoomModel.deleteRoomIssueById(req.params.id);
     return res.status(200).json({
-      message: 'Issue deleted',
+      success: true,
     });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
@@ -64,10 +64,8 @@ export const onUpdateRoomIssue = async (req: Request, res: Response) => {
       link,
     };
     isValidFields(issueFields);
-    await RoomModel.updateRoomIssueById(req.params.id, issueFields);
-    return res.status(200).json({
-      message: 'Issue updated',
-    });
+    const issue = await RoomModel.updateRoomIssueById(req.params.id, issueFields);
+    return res.status(200).json(issue);
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
@@ -76,10 +74,8 @@ export const onUpdateRoomIssue = async (req: Request, res: Response) => {
 export const onUpdateRoomTitle = async (req: Request, res: Response) => {
   try {
     const { roomTitle } = req.body;
-    await RoomModel.updateRoomTitle(req.params.id, roomTitle);
-    return res.status(200).json({
-      message: 'Title updated',
-    });
+    const title = await RoomModel.updateRoomTitle(req.params.id, roomTitle);
+    return res.status(200).json(title);
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
@@ -89,8 +85,9 @@ export const onDeleteRoomById = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     checkRoomIdIsValid(id);
-    const deleteInitiator = await UserModel.getUserById(req.userId);
-    if (deleteInitiator.role !== 'master') {
+    const deleteInitiator: any = await UserModel.getUserById(req.userId);
+    const owner = await RoomModel.isRoomOwner(deleteInitiator._id);
+    if (owner.toString() !== deleteInitiator._id.toString()) {
       throw new Error('Not enough permissions');
     }
     const io = req.app.get('io');
@@ -101,7 +98,7 @@ export const onDeleteRoomById = async (req: any, res: Response) => {
     });
     await RoomModel.deleteRoomById(id);
     return res.status(200).json({
-      message: 'Room deleted',
+      success: true,
     });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
@@ -137,10 +134,8 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
       }
     });
     checkRoomIdIsValid(req.params.id);
-    await RoomModel.setRoomRules(req.params.id, rules);
-    return res.status(201).json({
-      status: 'Rules set successfully',
-    });
+    const setRules = await RoomModel.setRoomRules(req.params.id, rules);
+    return res.status(201).json(setRules);
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,
@@ -167,8 +162,8 @@ export const onLeaveRoom = async (req: any, res: any) => {
         } else {
           room.users.splice(userIndex, 1);
           await room.save();
-          const newMsg = await MessageModel.createMsg({
-            userRoom: { roomId: id },
+          const newMsg = await MessageModel.createMsg({ // ???????
+            roomId: id,
             content: `${userDetails.firstName} left the room.`,
           });
           await currentSocket.to(id).emit(Event.MESSAGE, { newMsg });

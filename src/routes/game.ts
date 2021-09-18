@@ -6,7 +6,7 @@ import {
 const router = express.Router();
 
 router
-  .post('/', onGetBets)
+  .get('/', onGetBets)
   .put('/', onUpdateBetById);
 
 export default router;

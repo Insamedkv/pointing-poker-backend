@@ -1,5 +1,3 @@
-import { Event } from '../constants';
-
 export interface UserSocket {
   socketId: string;
   userId: string;

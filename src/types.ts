@@ -8,12 +8,18 @@ export interface ChatMessage {
 
 export interface Bet {
   roomId: string;
-  userId?: string;
+  userId: string;
+  issueId: string;
   content: string;
 }
 
-export interface SocketIssue {
+export interface SocketIssueCreate {
   roomId: string;
+  issue: Issue;
+}
+
+export interface SocketIssueUpdate {
   issueId: string;
+  roomId: string;
   issue: Issue;
 }

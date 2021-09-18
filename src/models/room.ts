@@ -5,9 +5,9 @@ import {
 import cloudinary from '../utils/cloudinary';
 import { UserModel } from './user';
 
-interface Rules {
+export interface Rules {
   masterAsAPlayer: boolean,
-  cardType: string,
+  cardType: any[],
   newUsersEnter: boolean,
   autoRotateCardsAfterVote: boolean,
   changeChoiseAfterCardsRotate: boolean,
@@ -31,12 +31,14 @@ export interface Room {
   rules: Array<Rules>;
   users: Array<RoomUser>;
   issues: Array<Issue>;
+  roomCreator: string;
 }
 
 export interface RoomModelStaticMethods extends Model<Room> {
   createRoom(userId: string): Room;
   joinRoom(roomId: string, userId: string): void;
   deleteRoomById(userId: string): void;
+  isRoomOwner(userId: string): string;
   getRoomUsers(roomId: string): Room;
   deleteUserFromRoomById(id: string): void;
   getRoomIssues(roomId: string): Issue[];
@@ -44,7 +46,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   deleteRoomIssueById(issueId: string): void;
   getRoom(roomId: ObjectId): Room;
   setRoomRules(roomId: string, rules: Rules): void;
-  updateRoomIssueById(issueId: string, issue: Issue): void;
+  updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
 }
 
@@ -54,7 +56,7 @@ const roomSchema = new Schema<Room, RoomModelStaticMethods>(
     rules: [
       {
         masterAsAPlayer: { type: Boolean },
-        cardType: { type: String },
+        cardType: { type: Array },
         newUsersEnter: { type: Boolean },
         autoRotateCardsAfterVote: { type: Boolean },
         changeChoiseAfterCardsRotate: { type: Boolean },
@@ -75,17 +77,24 @@ const roomSchema = new Schema<Room, RoomModelStaticMethods>(
         time: { type: Date, default: Date.now },
       },
     ],
+    roomCreator: { type: Schema.Types.ObjectId, ref: 'roomModel' },
   },
   { timestamps: true },
 );
 
 roomSchema.statics.createRoom = async function (userId: string) {
-  const room = await this.create({ users: [{ user: userId }], roomTitle: 'Planning poker' });
+  const room = await this.create({ users: [{ user: userId }], roomTitle: 'Planning poker', roomCreator: userId });
   return room;
 };
 
 roomSchema.statics.getRoom = async function (roomId: string) {
   return this.findOne({ _id: roomId });
+};
+
+roomSchema.statics.isRoomOwner = async function (userId: string) {
+  const room = await this.findOne({ roomCreator: userId });
+  if (!room) throw new Error('Not enough permissions');
+  return room.roomCreator;
 };
 
 roomSchema.statics.joinRoom = async function (
@@ -144,7 +153,7 @@ roomSchema.statics.updateRoomIssueById = async function (issueId: string, issue:
       $set: { 'issues.$.issueTitle': issueTitle, 'issues.$.priority': priority, 'issues.$.link': link },
     });
   const updated: any = await this.find({ 'issues._id': issueId }, { 'issues.$': 1 });
-  return updated[0].issues;
+  return updated[0].issues[0];
 };
 
 roomSchema.statics.updateRoomTitle = async function (roomId: string, roomTitle: string) {
@@ -157,6 +166,7 @@ roomSchema.statics.setRoomRules = async function (roomId: string, rules: Rules) 
   room.rules.pop();
   room.rules.push(rules);
   await room.save();
+  return room.rules[0];
 };
 
 roomSchema.statics.updateTitle = async function (roomTitle: string, roomId: string) {

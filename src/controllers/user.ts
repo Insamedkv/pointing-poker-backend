@@ -19,15 +19,14 @@ export const onGetUserById = async (req: Request, res: Response) => {
 export const onCreateUser = async (req: any, res: Response) => {
   try {
     const { roomId } = req.body;
-
-    const avatar = await cloudinary.uploader.upload(req.file.path);
+    // const avatar = await cloudinary.uploader.upload(req.body.avatar);
     const userToCreate: Partial<User> = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       position: req.body.position,
-      avatar: avatar.secure_url,
-      cloudinary_id: avatar.public_id,
-      role: req.body.role,
+      // avatar: avatar?.secure_url,
+      // cloudinary_id: avatar?.public_id,
+      asObserver: req.body.asObserver,
     };
 
     if (roomId) {
@@ -37,12 +36,12 @@ export const onCreateUser = async (req: any, res: Response) => {
       const user = await UserModel.createUser(userToCreate);
       await RoomModel.joinRoom(roomId, user.id);
       const authToken = await encode(user.id);
-      return res.status(201).json({ authorization: authToken });
+      return res.status(201).json({ authorization: authToken, userData: user });
     }
     const user = await UserModel.createUser(userToCreate);
     const authToken = await encode(user.id);
     const room = await RoomModel.createRoom(user.id);
-    return res.status(201).json({ authorization: authToken, room: room._id });
+    return res.status(201).json({ authorization: authToken, room: room._id, userData: user });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
@@ -51,27 +50,28 @@ export const onCreateUser = async (req: any, res: Response) => {
 export const onDeleteUserById = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
-    const deleteInitiator = await UserModel.getUserById(req.userId);
-    if (deleteInitiator.role !== 'master') {
+    const deleteInitiator: any = await UserModel.getUserById(req.userId);
+    const owner = await RoomModel.isRoomOwner(deleteInitiator._id);
+    if (owner.toString() !== deleteInitiator._id.toString()) {
       throw new Error('Not enough permissions');
     }
-    const user = await UserModel.deleteUserById(req.params.id);
+    const user = await UserModel.deleteUserById(id);
     if (!user) {
       return res.status(200).json({
-        message: 'User not found',
+        message: 'User for delete not found',
       });
     }
     const io = req.app.get('io');
-    await io.to(id).emit(Event.USER_DELETE, id);
+    await io.to(id).emit(Event.USER_DELETE, `Deleted user: ${user.firstName}.`);
     const socketIDs = leaveRoom(id);
     socketIDs.forEach((socketID) => {
       io.sockets.sockets.get(socketID).leave(id);
     });
-    await RoomModel.deleteUserFromRoomById(req.params.id);
+    await RoomModel.deleteUserFromRoomById(id);
     await cloudinary.uploader.destroy(user.cloudinary_id!);
     await user.remove();
     return res.status(200).json({
-      message: `Deleted user: ${user.name}.`,
+      message: `Deleted user: ${user.firstName}.`,
     });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });

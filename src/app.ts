@@ -9,13 +9,15 @@ import roomRouter from './routes/room';
 import gameRouter from './routes/game';
 import userRouter from './routes/user';
 import messageRouter from './routes/message';
-import { Bet, ChatMessage, SocketIssue } from './types';
+import {
+  Bet, ChatMessage, SocketIssueCreate, SocketIssueUpdate,
+} from './types';
 import { connectDb } from './config/db';
-import { joinRoom } from './utils/usersSocket';
+import { joinRoom, UserSocket } from './utils/usersSocket';
 import { MessageModel } from './models/message';
 import { Event } from './constants';
 import { GameModel } from './models/game';
-import { RoomModel } from './models/room';
+import { RoomModel, Rules } from './models/room';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
@@ -30,7 +32,7 @@ app.set('io', io);
 connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
     console.log('Client connected..');
-    socket.on(Event.JOIN, async (userRoom) => {
+    socket.on(Event.JOIN, async (userRoom: UserSocket) => {
       console.log('User joined room');
       console.log(`[user]: ${JSON.stringify(userRoom)}`);
       joinRoom(socket.id, userRoom.userId, userRoom.roomId);
@@ -60,35 +62,35 @@ connectDb().then(async () => {
       try {
         await GameModel.setBet(bet);
         const userDetails = await UserModel.getUserById((bet.userId)!);
-        io.to(bet.roomId).emit(Event.MESSAGE, `${userDetails.firstName} set his bet `);
+        io.to(bet.roomId).emit(Event.BET, `${userDetails.firstName} set his bet `);
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on(Event.ISSUE_CREATE, async (i: SocketIssue) => {
+    socket.on(Event.ISSUE_CREATE, async (i: SocketIssueCreate) => {
       console.log('Issue has been created');
       console.log(`[message]: ${JSON.stringify(i)}`);
       try {
-        const issue = await RoomModel.createRoomIssue(i.issueId, i.issue);
+        const issue = await RoomModel.createRoomIssue(i.roomId, i.issue);
         io.to(i.roomId).emit(Event.ISSUE_CREATE, issue);
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on(Event.ISSUE_UPDATE, async (i: SocketIssue) => {
+    socket.on(Event.ISSUE_UPDATE, async (i: SocketIssueUpdate) => {
       console.log('Issue has been updated');
       console.log(`[message]: ${JSON.stringify(i)}`);
       try {
-        const issue = await RoomModel.updateRoomIssueById(i.issueId, i.issue);
+        const issue = await RoomModel.updateRoomIssueById(i.issueId!, i.issue);
         io.to(i.roomId).emit(Event.ISSUE_UPDATE, issue);
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on(Event.TITLE_UPDATE, async (roomTitle: string, roomId: string) => {
+    socket.on(Event.TITLE_UPDATE, async ({ roomTitle, roomId }) => {
       console.log('Title has been updated');
       console.log(`[message]: ${JSON.stringify(roomTitle)}`);
       try {
@@ -98,6 +100,65 @@ connectDb().then(async () => {
         console.log(err);
       }
     });
+
+    socket.on(Event.VOTE_START, async (roomId: string) => {
+      console.log('Vote has been started');
+      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      try {
+        io.to(roomId).emit(Event.VOTE_START, true);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.VOTE_END, async ({ roomId, vote }) => {
+      console.log('Vote has been ended');
+      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      try {
+        io.to(roomId).emit(Event.VOTE_END, vote);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.VOTE_RESULT, async ({ roomId, vote, userForKickId }) => {
+      console.log('Vote results');
+      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      try {
+        const roomUsers = await RoomModel.getRoomUsers;
+        const numberOfUsersWithoutMaster = roomUsers.length - 1;
+        if (Math.floor(numberOfUsersWithoutMaster / 2 + 1) < vote) {
+          io.to(roomId).emit(Event.VOTE_RESULT, 'Kick rejected');
+        }
+        const kickedUserInfo = await UserModel.deleteUserById(userForKickId);
+        io.to(roomId).emit(Event.VOTE_RESULT, `${kickedUserInfo.name} kicked from room`);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.SET_RULES, async (roomId: string, rules: Rules) => {
+      console.log('Vote has been ended');
+      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      try {
+        const setRules = await RoomModel.setRoomRules(roomId, rules);
+        io.to(roomId).emit(Event.SET_RULES, setRules);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    // socket.on(Event.PLAY, async () => {
+    //   console.log('Title has been updated');
+    //   console.log(`[message]: ${JSON.stringify()}`);
+    //   try {
+    //     const newTitle = await RoomModel.updateRoomTitle();
+    //     io.to().emit(Event.TITLE_UPDATE, newTitle);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
+    // setRules
   });
 
   const PREFIX = '/api';

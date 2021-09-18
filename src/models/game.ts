@@ -7,12 +7,13 @@ export interface GameBet {
   content: string;
   userId: ObjectId;
   roomId: string;
+  issueId: string;
 }
 
 export interface GameModelStaticMethods extends Model<GameBet> {
   setBet(bet: Bet): GameBet;
   updateBetById(betId: string, content: string): GameBet;
-  getBets(roomId: string): any;
+  getBets(roomId: string): GameBet[];
 }
 
 const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
@@ -26,6 +27,10 @@ const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
       type: String,
       required: true,
     },
+    issueId: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true },
 );
@@ -34,7 +39,7 @@ gameSchema.statics.setBet = async function (bet: Bet) {
   const user = await UserModel.getUserById(bet.userId!);
   if (!user) throw new Error('User not found');
   const doneBet = await this.create({
-    content: bet.content, userId: user.id, roomId: bet.roomId,
+    content: bet.content, userId: user.id, roomId: bet.roomId, issueId: bet.issueId,
   });
   return doneBet;
 };
