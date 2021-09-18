@@ -184,3 +184,16 @@ export const onLeaveRoom = async (req: any, res: any) => {
     });
   }
 };
+
+export const onCheckRoomCreated = async (req: Request, res: Response) => {
+  try {
+    await RoomModel.getRoom(req.params.id);
+    return res.status(200).json({
+      status: 'Room found',
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message,
+    });
+  }
+};
