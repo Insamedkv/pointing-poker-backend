@@ -19,13 +19,13 @@ export const onGetUserById = async (req: Request, res: Response) => {
 export const onCreateUser = async (req: any, res: Response) => {
   try {
     const { roomId } = req.body;
-    // const avatar = await cloudinary.uploader.upload(req.body.avatar);
+    const avatar = await cloudinary.uploader.upload(req.body.avatar);
     const userToCreate: Partial<User> = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       position: req.body.position,
-      // avatar: avatar?.secure_url,
-      // cloudinary_id: avatar?.public_id,
+      avatar: avatar?.secure_url,
+      cloudinary_id: avatar?.public_id,
       asObserver: req.body.asObserver,
     };
 
