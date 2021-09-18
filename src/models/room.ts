@@ -44,7 +44,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   getRoomIssues(roomId: string): Issue[];
   createRoomIssue(roomId: string, issue: Issue): void;
   deleteRoomIssueById(issueId: string): void;
-  getRoom(roomId: ObjectId): Room;
+  getRoom(roomId: string): Room;
   setRoomRules(roomId: string, rules: Rules): void;
   updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
@@ -88,7 +88,9 @@ roomSchema.statics.createRoom = async function (userId: string) {
 };
 
 roomSchema.statics.getRoom = async function (roomId: string) {
-  return this.findOne({ _id: roomId });
+  const room = await this.findOne({ _id: roomId });
+  if (room === null) throw new Error('Room not found');
+  return room;
 };
 
 roomSchema.statics.isRoomOwner = async function (userId: string) {
