@@ -1,0 +1,11 @@
+<html lang="en">
+<head>
+</head>
+<body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://localhost:4000/', { transports : ['websocket'] });
+    socket.on('connection');
+</script>
+</body>
+</html>
