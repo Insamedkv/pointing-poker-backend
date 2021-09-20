@@ -25,6 +25,10 @@ interface RoomUser {
   user: string;
 }
 
+interface RoomCreator {
+  roomCreator: string;
+}
+
 export interface Room {
   _id: ObjectId,
   roomTitle: string,
@@ -40,6 +44,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   deleteRoomById(userId: string): void;
   isRoomOwner(userId: string): string;
   getRoomUsers(roomId: string): Room;
+  getRoomCreator(roomId: string): RoomCreator;
   deleteUserFromRoomById(id: string): void;
   getRoomIssues(roomId: string): Issue[];
   createRoomIssue(roomId: string, issue: Issue): void;
@@ -91,6 +96,12 @@ roomSchema.statics.getRoom = async function (roomId: string) {
   const room = await this.findOne({ _id: roomId });
   if (room === null) throw new Error('Room not found');
   return room;
+};
+
+roomSchema.statics.getRoomCreator = async function (roomId: string) {
+  const room = await this.findOne({ _id: roomId });
+  if (!room) throw new Error('Room not found');
+  return room.roomCreator;
 };
 
 roomSchema.statics.isRoomOwner = async function (userId: string) {

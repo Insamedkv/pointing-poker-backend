@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { UserModel } from '../models/user';
+import { config } from '../config/db.config';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ export const encode = async (userId: string) => {
     {
       userId,
     },
-    process.env.API_KEY!,
+    config.API_KEY!,
   );
   return authToken;
 };
@@ -24,7 +25,7 @@ export const decodeMiddleware = (req: any, res: any, next: any) => {
   }
   try {
     const accessToken = req.headers.authorization;
-    const decoded: any = jwt.verify(accessToken, process.env.API_KEY!);
+    const decoded: any = jwt.verify(accessToken, config.API_KEY);
     req.userId = decoded.userId;
     return next();
   } catch (error: any) {

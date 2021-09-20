@@ -19,13 +19,13 @@ export const onGetUserById = async (req: Request, res: Response) => {
 export const onCreateUser = async (req: any, res: Response) => {
   try {
     const { roomId } = req.body;
-    const avatar = await cloudinary.uploader.upload(req.body.avatar);
+    const avatar = req.body.avatar === '' ? '' : await cloudinary.uploader.upload(req.body.avatar);
     const userToCreate: Partial<User> = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       position: req.body.position,
-      avatar: avatar?.secure_url,
-      cloudinary_id: avatar?.public_id,
+      avatar: avatar === '' ? '' : avatar?.secure_url,
+      cloudinary_id: avatar === '' ? '' : avatar?.public_id,
       asObserver: req.body.asObserver,
     };
 
@@ -40,8 +40,9 @@ export const onCreateUser = async (req: any, res: Response) => {
     }
     const user = await UserModel.createUser(userToCreate);
     const authToken = await encode(user.id);
+    console.log(user.id);
     const room = await RoomModel.createRoom(user.id);
-    return res.status(201).json({ authorization: authToken, room: room._id, userData: user });
+    return res.status(201).json({ authorization: authToken, roomId: room._id, userData: user });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }

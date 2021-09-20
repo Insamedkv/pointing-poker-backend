@@ -9,11 +9,13 @@ import {
   onDeleteRoomById,
   onCreateRoomIssue,
   onGetRoomUsers,
+  onGetRoomCreator,
 } from '../controllers/room';
 
 const router = express.Router();
 
 router
+  .get('/:id/creator', onGetRoomCreator)
   .get('/:id', onGetRoomUsers)
   .get('/:id/issue', onGetRoomIssues)
   .post('/:id/issue', onCreateRoomIssue)
