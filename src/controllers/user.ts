@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Server } from 'socket.io';
 import { Event } from '../constants';
 import { encode } from '../middlewares/jwt';
 import { RoomModel } from '../models/room';
@@ -16,7 +17,7 @@ export const onGetUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const onCreateUser = async (req: any, res: Response) => {
+export const onCreateUser = (ioServer: Server) => async (req: any, res: Response) => {
   try {
     const { roomId } = req.body;
     const avatar = req.body.avatar === '' ? '' : await cloudinary.uploader.upload(req.body.avatar);
@@ -31,18 +32,19 @@ export const onCreateUser = async (req: any, res: Response) => {
 
     if (roomId) {
       checkRoomIdIsValid(roomId);
-      const room = RoomModel.getRoom(roomId);
+      const room = await RoomModel.getRoom(roomId);
       if (!room) throw new Error('Room not found');
       const user = await UserModel.createUser(userToCreate);
       await RoomModel.joinRoom(roomId, user.id);
+      ioServer.to(roomId).emit(Event.JOIN, { user });
       const authToken = await encode(user.id);
-      return res.status(201).json({ authorization: authToken, userData: user });
+      return res.status(201).json({ authorization: authToken, userData: user, room });
     }
     const user = await UserModel.createUser(userToCreate);
     const authToken = await encode(user.id);
     console.log(user.id);
     const room = await RoomModel.createRoom(user.id);
-    return res.status(201).json({ authorization: authToken, roomId: room._id, userData: user });
+    return res.status(201).json({ authorization: authToken, userData: user, room });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }

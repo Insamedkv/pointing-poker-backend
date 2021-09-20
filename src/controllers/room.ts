@@ -21,7 +21,7 @@ export const onGetRoomUsers = async (req: Request, res: Response) => {
 
 export const onGetRoomCreator = async (req: Request, res: Response) => {
   try {
-    const roomCreator = await RoomModel.getRoomUsers(req.params.id);
+    const roomCreator = await RoomModel.getRoomCreator(req.params.id);
     return res.status(201).json(roomCreator);
   } catch (error: any) {
     return res.status(400).json({

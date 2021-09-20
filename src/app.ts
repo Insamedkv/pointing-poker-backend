@@ -4,11 +4,11 @@ import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
-import indexRouter from './routes/index';
+import { createUserRouter } from './routes/index';
 import roomRouter from './routes/room';
 import gameRouter from './routes/game';
 import userRouter from './routes/user';
-import messageRouter from './routes/message';
+import { createMessageRouter } from './routes/message';
 import {
   Bet, ChatMessage, SocketIssueCreate, SocketIssueUpdate,
 } from './types';
@@ -27,34 +27,32 @@ app.use(cors({ credentials: false }));
 const server: HttpServer = createServer(app);
 const io: IOServer = (socketio as any)(server, { cors: { credentials: false } });
 
-app.set('io', io);
-
 connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
     console.log('Client connected..');
-    socket.on(Event.JOIN, async (userRoom: UserSocket) => {
-      console.log('User joined room');
-      console.log(`[user]: ${JSON.stringify(userRoom)}`);
-      joinRoom(socket.id, userRoom.userId, userRoom.roomId);
-      socket.join(userRoom.roomId);
-      try {
-        const userDetails = await UserModel.getUserById(userRoom.userId);
-        socket.to(userRoom.roomId).emit(Event.JOIN, { userDetails, joinedRoom: userRoom.roomId });
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    // socket.on(Event.JOIN, async (userRoom: UserSocket) => {
+    //   console.log('User joined room');
+    //   console.log(`[user]: ${JSON.stringify(userRoom)}`);
+    //   joinRoom(socket.id, userRoom.userId, userRoom.roomId);
+    //   socket.join(userRoom.roomId);
+    //   try {
+    //     const userDetails = await UserModel.getUserById(userRoom.userId);
+    //     socket.to(userRoom.roomId).emit(Event.JOIN, { userDetails, joinedRoom: userRoom.roomId });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
 
-    socket.on(Event.MESSAGE, async (message: ChatMessage) => {
-      console.log('Message has been emitted');
-      console.log(`[message]: ${JSON.stringify(message)}`);
-      try {
-        const newMsg = await MessageModel.createMsg(message);
-        io.to(message.roomId).emit(Event.MESSAGE, { newMsg });
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    // socket.on(Event.MESSAGE, async (message: ChatMessage) => {
+    //   console.log('Message has been emitted');
+    //   console.log(`[message]: ${JSON.stringify(message)}`);
+    //   try {
+    //     const newMsg = await MessageModel.createMsg(message);
+    //     io.to(message.roomId).emit(Event.MESSAGE, { newMsg });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
 
     socket.on(Event.BET, async (bet: Bet) => {
       console.log('Bet has been emitted');
@@ -162,12 +160,12 @@ connectDb().then(async () => {
   });
 
   const PREFIX = '/api';
-  app.use(`${PREFIX}`, indexRouter);
+  app.use(`${PREFIX}`, createUserRouter(io));
   app.use(decodeMiddleware);
   app.use(`${PREFIX}/game`, gameRouter);
   app.use(`${PREFIX}/room`, roomRouter);
   app.use(`${PREFIX}/users`, userRouter);
-  app.use(`${PREFIX}/messages`, messageRouter);
+  app.use(`${PREFIX}/messages`, createMessageRouter(io));
   app.use('*', (req, res) => res.status(404).json({
     message: "API endpoint doesn't exist",
   }));

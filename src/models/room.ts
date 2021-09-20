@@ -6,19 +6,19 @@ import cloudinary from '../utils/cloudinary';
 import { UserModel } from './user';
 
 export interface Rules {
-  masterAsAPlayer: boolean,
-  cardType: any[],
-  newUsersEnter: boolean,
-  autoRotateCardsAfterVote: boolean,
-  changeChoiseAfterCardsRotate: boolean,
-  isTimerNeeded: boolean,
-  roundTime: number,
+  masterAsAPlayer: boolean;
+  cardType: any[];
+  newUsersEnter: boolean;
+  autoRotateCardsAfterVote: boolean;
+  changeChoiseAfterCardsRotate: boolean;
+  isTimerNeeded: boolean;
+  roundTime: number;
 }
 
 export interface Issue {
-  issueTitle: string,
-  priority: string,
-  link: string,
+  issueTitle: string;
+  priority: string;
+  link: string;
 }
 
 interface RoomUser {
@@ -30,8 +30,8 @@ interface RoomCreator {
 }
 
 export interface Room {
-  _id: ObjectId,
-  roomTitle: string,
+  id: string;
+  roomTitle: string;
   rules: Array<Rules>;
   users: Array<RoomUser>;
   issues: Array<Issue>;
@@ -50,6 +50,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   createRoomIssue(roomId: string, issue: Issue): void;
   deleteRoomIssueById(issueId: string): void;
   getRoom(roomId: string): Room;
+  getRoomByUser(userId: string): Room;
   setRoomRules(roomId: string, rules: Rules): void;
   updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
@@ -98,10 +99,15 @@ roomSchema.statics.getRoom = async function (roomId: string) {
   return room;
 };
 
+roomSchema.statics.getRoomByUser = async function (userId: string) {
+  return this.findOne({ 'users.user': userId });
+};
+
 roomSchema.statics.getRoomCreator = async function (roomId: string) {
   const room = await this.findOne({ _id: roomId });
   if (!room) throw new Error('Room not found');
-  return room.roomCreator;
+  const roomCreator = await UserModel.getUserById(room.roomCreator);
+  return roomCreator;
 };
 
 roomSchema.statics.isRoomOwner = async function (userId: string) {
@@ -134,7 +140,9 @@ roomSchema.statics.deleteRoomById = async function (roomId: string) {
 roomSchema.statics.getRoomUsers = async function (roomId: string) {
   const room = await this.findOne({ _id: roomId });
   if (!room) throw new Error('Room not found');
-  return room.users;
+  const userArray = room.users.map((userObj) => (new Promise((res) => res(UserModel.getUserById(userObj.user)))));
+  const userResolve = await Promise.all(userArray);
+  return userResolve;
 };
 
 roomSchema.statics.deleteUserFromRoomById = async function (id: string) {

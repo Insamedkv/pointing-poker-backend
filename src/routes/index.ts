@@ -1,11 +1,11 @@
 import express from 'express';
+import { Server } from 'socket.io';
 import { onCheckRoomCreated } from '../controllers/room';
 import { onCreateUser } from '../controllers/user';
 
-const router = express.Router();
-
-router
-  .post('/signup', onCreateUser)
-  .get('/created/:id', onCheckRoomCreated);
-
-export default router;
+export function createUserRouter(ioServer: Server) {
+  const router = express.Router();
+  return router
+    .post('/signup', onCreateUser(ioServer))
+    .get('/created/:id', onCheckRoomCreated);
+}
