@@ -19,6 +19,18 @@ export const onGetRoomUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const onGetRoom = async (req: Request, res: Response) => {
+  try {
+    checkRoomIdIsValid(req.params.id);
+    const room = await RoomModel.getRoom(req.params.id);
+    return res.status(201).json(room);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message,
+    });
+  }
+};
+
 export const onGetRoomCreator = async (req: Request, res: Response) => {
   try {
     const roomCreator = await RoomModel.getRoomCreator(req.params.id);

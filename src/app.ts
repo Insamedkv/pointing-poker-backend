@@ -17,19 +17,28 @@ import { joinRoom, UserSocket } from './utils/usersSocket';
 import { MessageModel } from './models/message';
 import { Event } from './constants';
 import { GameModel } from './models/game';
-import { RoomModel, Rules } from './models/room';
+import { Issue, RoomModel, Rules } from './models/room';
+import { onGetRoomUsers } from './controllers/room';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({ credentials: false }));
+app.use(cors({ credentials: false, origin: '*' }));
 const server: HttpServer = createServer(app);
 const io: IOServer = (socketio as any)(server, { cors: { credentials: false } });
 
 connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
-    console.log('Client connected..');
+    console.log('Client connected...', socket.id);
+    socket.emit('clientConnected', socket.id);
+
+    socket.on(Event.JOIN, async (roomId: string) => {
+      socket.join(roomId);
+      const response = await RoomModel.getRoomUsers(roomId);
+      socket.to(roomId).emit(Event.ONJOIN, response);
+    });
+
     // socket.on(Event.JOIN, async (userRoom: UserSocket) => {
     //   console.log('User joined room');
     //   console.log(`[user]: ${JSON.stringify(userRoom)}`);
@@ -68,10 +77,12 @@ connectDb().then(async () => {
 
     socket.on(Event.ISSUE_CREATE, async (i: SocketIssueCreate) => {
       console.log('Issue has been created');
-      console.log(`[message]: ${JSON.stringify(i)}`);
+      console.log(`[message]: ${JSON.stringify(i.issue)}`);
       try {
-        const issue = await RoomModel.createRoomIssue(i.roomId, i.issue);
-        io.to(i.roomId).emit(Event.ISSUE_CREATE, issue);
+        await RoomModel.createRoomIssue(i.roomId, i.issue);
+        const issueList = await RoomModel.getRoomIssues(i.roomId);
+        console.log('get from db:', issueList);
+        io.to(i.roomId).emit(Event.ON_ISSUE_CREATE, issueList);
       } catch (err) {
         console.log(err);
       }

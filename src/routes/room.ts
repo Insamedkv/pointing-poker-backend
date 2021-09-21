@@ -10,13 +10,15 @@ import {
   onCreateRoomIssue,
   onGetRoomUsers,
   onGetRoomCreator,
+  onGetRoom,
 } from '../controllers/room';
 
 const router = express.Router();
 
 router
+  .get('/:id', onGetRoom)
   .get('/:id/creator', onGetRoomCreator)
-  .get('/:id', onGetRoomUsers)
+  .get('/:id/users', onGetRoomUsers)
   .get('/:id/issue', onGetRoomIssues)
   .post('/:id/issue', onCreateRoomIssue)
   .post('/:id/', onSetRoomRules)
