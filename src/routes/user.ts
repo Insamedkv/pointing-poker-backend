@@ -1,10 +1,10 @@
 import express from 'express';
+import { Server } from 'socket.io';
 import { onDeleteUserById, onGetUserById } from '../controllers/user';
 
-const router = express.Router();
-
-router
-  .get('/:id', onGetUserById)
-  .delete('/:id', onDeleteUserById);
-
-export default router;
+export function getDelUserRouter(ioServer: Server) {
+  const router = express.Router();
+  return router
+    .get('/:id', onGetUserById)
+    .delete('/:id/:socket', onDeleteUserById(ioServer));
+}
