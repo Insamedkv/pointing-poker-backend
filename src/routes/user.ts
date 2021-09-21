@@ -6,5 +6,5 @@ export function getDelUserRouter(ioServer: Server) {
   const router = express.Router();
   return router
     .get('/:id', onGetUserById)
-    .delete('/:id/:socket', onDeleteUserById(ioServer));
+    .delete('/:id', onDeleteUserById(ioServer));
 }

@@ -90,7 +90,6 @@ export const onCreateUser = (ioServer: Server) => async (req: any, res: Response
 export const onDeleteUserById = (ioServer: Server) => async (req: any, res: Response) => {
   try {
     const { id } = req.params;
-    const { socket } = req.params;
     const deleteInitiator: any = await UserModel.getUserById(req.userId);
     const owner = await RoomModel.isRoomOwner(deleteInitiator._id);
     const room = await RoomModel.getRoomByUser(id);
@@ -103,7 +102,6 @@ export const onDeleteUserById = (ioServer: Server) => async (req: any, res: Resp
         message: 'User for delete not found',
       });
     }
-    (ioServer.sockets.sockets.get(socket))!.disconnect();
     await RoomModel.deleteUserFromRoomById(id);
     if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
     await user.remove();

@@ -39,18 +39,18 @@ connectDb().then(async () => {
       socket.to(roomId).emit(Event.ONJOIN, response);
     });
 
-    socket.on(Event.JOIN, async (userRoom: UserSocket) => {
-      console.log('User joined room');
-      console.log(`[user]: ${JSON.stringify(userRoom)}`);
-      joinRoom(socket.id, userRoom.userId, userRoom.roomId);
-      socket.join(userRoom.roomId);
-      try {
-        const userDetails = await UserModel.getUserById(userRoom.userId);
-        socket.to(userRoom.roomId).emit(Event.JOIN, { userDetails, joinedRoom: userRoom.roomId });
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    // socket.on(Event.JOIN, async (userRoom: UserSocket) => {
+    //   console.log('User joined room');
+    //   console.log(`[user]: ${JSON.stringify(userRoom)}`);
+    //   joinRoom(socket.id, userRoom.userId, userRoom.roomId);
+    //   socket.join(userRoom.roomId);
+    //   try {
+    //     const userDetails = await UserModel.getUserById(userRoom.userId);
+    //     socket.to(userRoom.roomId).emit(Event.JOIN, { userDetails, joinedRoom: userRoom.roomId });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
 
     // socket.on(Event.MESSAGE, async (message: ChatMessage) => {
     //   console.log('Message has been emitted');
@@ -60,41 +60,6 @@ connectDb().then(async () => {
     //     io.to(message.roomId).emit(Event.MESSAGE, { newMsg });
     //   } catch (err) {
     //     console.log(err);
-    //   }
-    // });
-
-    // socket.on(Event.USER_DELETE, async (userId: string) => {
-    //   console.log('Delete user');
-    //   console.log(`[message]: ${JSON.stringify(userId)}`);
-    //   try {
-    //     const { id } = req.params;
-    //     const deleteInitiator: any = await UserModel.getUserById(req.userId);
-    //     const owner = await RoomModel.isRoomOwner(deleteInitiator._id);
-    //     const room = await RoomModel.getRoomByUser(id);
-    //     if (owner.toString() !== deleteInitiator._id.toString()) {
-    //       throw new Error('Not enough permissions');
-    //     }
-    //     const user = await UserModel.deleteUserById(id);
-    //     if (!user) {
-    //       return res.status(200).json({
-    //         message: 'User for delete not found',
-    //       });
-    //     }
-    //     // const io = req.app.get('io');
-    //     // const socketIDs = leaveRoom(id);
-    //     // socketIDs.forEach((socketID) => {
-    //     //   io.sockets.sockets.get(socketID).leave(id);
-    //     // });
-    //     await RoomModel.deleteUserFromRoomById(id);
-    //     if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
-    //     await user.remove();
-    //     const users = await RoomModel.getRoomUsers(room.id);
-    //     await io.to(room.id).emit(Event.USER_DELETE, users);
-    //     return res.status(200).json({
-    //       message: `Deleted user: ${user.firstName}.`,
-    //     });
-    //   } catch (error: any) {
-    //     return res.status(400).json({ error: error.message });
     //   }
     // });
 
