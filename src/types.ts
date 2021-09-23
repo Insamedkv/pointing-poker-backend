@@ -18,6 +18,11 @@ export interface SocketIssueCreate {
   issue: Issue;
 }
 
+export interface SocketIssueDelete {
+  roomId: string;
+  issueId: string;
+}
+
 export interface SocketIssueUpdate {
   issueId: string;
   roomId: string;

@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { createServer, Server as HttpServer } from 'http';
 import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
@@ -10,7 +11,7 @@ import gameRouter from './routes/game';
 import { getDelUserRouter } from './routes/user';
 import { createMessageRouter } from './routes/message';
 import {
-  Bet, ChatMessage, SocketIssueCreate, SocketIssueUpdate,
+  Bet, ChatMessage, SocketIssueCreate, SocketIssueDelete, SocketIssueUpdate,
 } from './types';
 import { connectDb } from './config/db';
 import { joinRoom, UserSocket } from './utils/usersSocket';
@@ -19,6 +20,7 @@ import { Event } from './constants';
 import { GameModel } from './models/game';
 import { Issue, RoomModel, Rules } from './models/room';
 import { onGetRoomUsers } from './controllers/room';
+import { config } from './config/db.config';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
@@ -32,36 +34,6 @@ connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
     console.log('Client connected...', socket.id);
     socket.emit('clientConnected', socket.id);
-
-    socket.on(Event.JOIN, async (roomId: string) => {
-      socket.join(roomId);
-      const response = await RoomModel.getRoomUsers(roomId);
-      socket.to(roomId).emit(Event.ONJOIN, response);
-    });
-
-    // socket.on(Event.JOIN, async (userRoom: UserSocket) => {
-    //   console.log('User joined room');
-    //   console.log(`[user]: ${JSON.stringify(userRoom)}`);
-    //   joinRoom(socket.id, userRoom.userId, userRoom.roomId);
-    //   socket.join(userRoom.roomId);
-    //   try {
-    //     const userDetails = await UserModel.getUserById(userRoom.userId);
-    //     socket.to(userRoom.roomId).emit(Event.JOIN, { userDetails, joinedRoom: userRoom.roomId });
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
-
-    // socket.on(Event.MESSAGE, async (message: ChatMessage) => {
-    //   console.log('Message has been emitted');
-    //   console.log(`[message]: ${JSON.stringify(message)}`);
-    //   try {
-    //     const newMsg = await MessageModel.createMsg(message);
-    //     io.to(message.roomId).emit(Event.MESSAGE, { newMsg });
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
 
     socket.on(Event.BET, async (bet: Bet) => {
       console.log('Bet has been emitted');
@@ -83,6 +55,19 @@ connectDb().then(async () => {
         const issueList = await RoomModel.getRoomIssues(i.roomId);
         console.log('get from db:', issueList);
         io.to(i.roomId).emit(Event.ON_ISSUE_CREATE, issueList);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.ISSUE_DELETE, async (i: SocketIssueDelete) => {
+      console.log('Issue has been created');
+      console.log(`[message]: ${JSON.stringify(i)}`);
+      try {
+        await RoomModel.deleteRoomIssueById(i.issueId);
+        const issueList = await RoomModel.getRoomIssues(i.roomId);
+        console.log('get from db:', issueList);
+        io.to(i.roomId).emit(Event.ON_ISSUE_DELETE, issueList);
       } catch (err) {
         console.log(err);
       }

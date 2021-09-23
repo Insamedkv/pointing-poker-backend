@@ -5,6 +5,7 @@ export enum Event {
   MESSAGE = 'message',
   LEAVE = 'leave',
   BET = 'bet',
+  KICK = 'kick',
   // UPDATE_BET = 'update bet', ??
   // ENDGAME = 'endgame',
   ROOM_DELETE = 'room delete',
@@ -13,6 +14,8 @@ export enum Event {
   TITLE_UPDATE = 'title update',
   ISSUE_UPDATE = 'issue update',
   ISSUE_CREATE = 'issue create',
+  ISSUE_DELETE = 'issue delete',
+  ON_ISSUE_DELETE = 'on issue delete',
   ON_ISSUE_CREATE = 'on issue create',
   VOTE_START = 'vote start',
   VOTE_END = 'vote end',
