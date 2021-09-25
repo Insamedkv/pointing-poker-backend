@@ -6,7 +6,7 @@ import cors from 'cors';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
 import { createUserRouter } from './routes/index';
-import roomRouter from './routes/room';
+import { createRoomRouter } from './routes/room';
 import gameRouter from './routes/game';
 import { getDelUserRouter } from './routes/user';
 import { createMessageRouter } from './routes/message';
@@ -159,7 +159,7 @@ connectDb().then(async () => {
   app.use(`${PREFIX}`, createUserRouter(io));
   app.use(decodeMiddleware);
   app.use(`${PREFIX}/game`, gameRouter);
-  app.use(`${PREFIX}/room`, roomRouter);
+  app.use(`${PREFIX}/room`, createRoomRouter(io));
   app.use(`${PREFIX}/users`, getDelUserRouter(io));
   app.use(`${PREFIX}/messages`, createMessageRouter(io));
   app.use('*', (req, res) => res.status(404).json({

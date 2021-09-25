@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Server } from 'socket.io';
 import { Event } from '../constants';
 import { MessageModel } from '../models/message';
 import { RoomModel } from '../models/room';
@@ -51,7 +52,7 @@ export const onGetRoomIssues = async (req: Request, res: Response) => {
   }
 };
 
-export const onCreateRoomIssue = async (req: Request, res: Response) => {
+export const onCreateRoomIssue = (ioServer: Server) => async (req: Request, res: Response) => {
   try {
     const { issueTitle, priority, link } = req.body;
     const issueFields = {
@@ -60,25 +61,28 @@ export const onCreateRoomIssue = async (req: Request, res: Response) => {
       link,
     };
     isValidFields(issueFields);
-    const issue = await RoomModel.createRoomIssue(req.params.id, issueFields);
-    return res.status(201).json(issue);
+    await RoomModel.createRoomIssue(req.params.id, issueFields);
+    const issueList = await RoomModel.getRoomIssues(req.params.id);
+    await ioServer.to(req.params.id).emit(Event.ON_ISSUE_CREATE, issueList);
+    return res.status(201).json('Issue created');
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
 };
 
-export const onDeleteRoomIssue = async (req: Request, res: Response) => {
+export const onDeleteRoomIssue = (ioServer: Server) => async (req: Request, res: Response) => {
   try {
     await RoomModel.deleteRoomIssueById(req.params.id);
-    return res.status(200).json({
-      success: true,
-    });
+    const issueList = await RoomModel.getRoomIssues(req.params.roomid);
+    console.log(issueList);
+    await ioServer.to(req.params.roomid).emit(Event.ON_ISSUE_CREATE, issueList);
+    return res.status(200).json('issue deleted');
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
 };
 
-export const onUpdateRoomIssue = async (req: Request, res: Response) => {
+export const onUpdateRoomIssue = (ioServer: Server) => async (req: Request, res: Response) => {
   try {
     const { issueTitle, priority, link } = req.body;
     const issueFields = {
@@ -87,8 +91,10 @@ export const onUpdateRoomIssue = async (req: Request, res: Response) => {
       link,
     };
     isValidFields(issueFields);
-    const issue = await RoomModel.updateRoomIssueById(req.params.id, issueFields);
-    return res.status(200).json(issue);
+    await RoomModel.updateRoomIssueById(req.params.id, issueFields);
+    const issueList = await RoomModel.getRoomIssues(req.params.roomid);
+    await ioServer.to(req.params.roomid).emit(Event.ON_ISSUE_CREATE, issueList);
+    return res.status(200).json('Issue updated');
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }

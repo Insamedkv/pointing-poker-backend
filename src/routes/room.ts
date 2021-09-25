@@ -1,4 +1,5 @@
 import express from 'express';
+import { Server } from 'socket.io';
 import {
   onGetRoomIssues,
   onUpdateRoomIssue,
@@ -12,18 +13,17 @@ import {
   onGetRoomCreator,
 } from '../controllers/room';
 
-const router = express.Router();
-
-router
-  .get('/:id/creator', onGetRoomCreator)
-  .get('/:id/users', onGetRoomUsers)
-  .get('/:id/issue', onGetRoomIssues)
-  .post('/:id/issue', onCreateRoomIssue)
-  .post('/:id/', onSetRoomRules)
-  .post('/:id/leave', onLeaveRoom)
-  .put('/:id/issue/:id', onUpdateRoomIssue)
-  .put('/:id/', onUpdateRoomTitle)
-  .delete('/:id/issue/:id', onDeleteRoomIssue)
-  .delete('/:id', onDeleteRoomById);
-
-export default router;
+export function createRoomRouter(ioServer: Server) {
+  const router = express.Router();
+  return router
+    .get('/:id/creator', onGetRoomCreator)
+    .get('/:id/users', onGetRoomUsers)
+    .get('/:id/issue', onGetRoomIssues)
+    .post('/:id/issue', onCreateRoomIssue(ioServer))
+    .post('/:id/', onSetRoomRules)
+    .post('/:id/leave', onLeaveRoom)
+    .put('/:roomid/issue/:id', onUpdateRoomIssue(ioServer))
+    .put('/:id/', onUpdateRoomTitle)
+    .delete('/:roomid/issue/:id', onDeleteRoomIssue(ioServer))
+    .delete('/:id', onDeleteRoomById);
+}
