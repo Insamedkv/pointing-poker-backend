@@ -6,10 +6,11 @@ import cloudinary from '../utils/cloudinary';
 import { UserModel } from './user';
 
 export interface Rules {
-  masterAsAPlayer: boolean;
+  scrumMasterAsAPlayer: boolean;
   cardType: any[];
   newUsersEnter: boolean;
   autoRotateCardsAfterVote: boolean;
+  shortScoreType: string;
   changingCardInEnd: boolean;
   isTimerNeeded: boolean;
   roundTime: number;
@@ -64,10 +65,11 @@ const roomSchema = new Schema<Room, RoomModelStaticMethods>(
     roomTitle: { type: String },
     rules: [
       {
-        masterAsAPlayer: { type: Boolean },
+        scrumMasterAsAPlayer: { type: Boolean },
         cardType: { type: Array },
         newUsersEnter: { type: Boolean },
         autoRotateCardsAfterVote: { type: Boolean },
+        shortScoreType: { type: String },
         changingCardInEnd: { type: Boolean },
         isTimerNeeded: { type: Boolean },
         roundTime: { type: Number },

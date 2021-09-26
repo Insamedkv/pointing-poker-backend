@@ -149,19 +149,21 @@ export const onDeleteRoomById = async (req: any, res: Response) => {
 export const onSetRoomRules = async (req: Request, res: Response) => {
   try {
     const {
-      masterAsAPlayer,
+      scrumMasterAsAPlayer,
       cardType,
       newUsersEnter,
       autoRotateCardsAfterVote,
+      shortScoreType,
       changingCardInEnd,
       isTimerNeeded,
       roundTime,
     } = req.body;
     const rules = {
-      masterAsAPlayer,
+      scrumMasterAsAPlayer,
       cardType,
       newUsersEnter,
       autoRotateCardsAfterVote,
+      shortScoreType,
       changingCardInEnd,
       isTimerNeeded,
       roundTime,
