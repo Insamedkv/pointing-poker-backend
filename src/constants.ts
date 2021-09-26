@@ -11,7 +11,7 @@ export enum Event {
   ROOM_DELETE = 'room delete',
   USER_DELETE = 'user delete',
   RULES_UPDATE = 'rules update',
-  TITLE_UPDATE = 'title update',
+  ON_TITLE_UPDATE = 'on title update',
   ISSUE_UPDATE = 'issue update',
   ISSUE_CREATE = 'issue create',
   ISSUE_DELETE = 'issue delete',

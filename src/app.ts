@@ -84,17 +84,6 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.TITLE_UPDATE, async ({ roomTitle, roomId }) => {
-      console.log('Title has been updated');
-      console.log(`[message]: ${JSON.stringify(roomTitle)}`);
-      try {
-        const newTitle = await RoomModel.updateRoomTitle(roomTitle, roomId);
-        io.to(roomId).emit(Event.TITLE_UPDATE, newTitle);
-      } catch (err) {
-        console.log(err);
-      }
-    });
-
     socket.on(Event.VOTE_START, async (roomId: string) => {
       console.log('Vote has been started');
       console.log(`[message]: ${JSON.stringify(roomId)}`);

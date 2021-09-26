@@ -179,6 +179,8 @@ roomSchema.statics.updateRoomIssueById = async function (issueId: string, issue:
 
 roomSchema.statics.updateRoomTitle = async function (roomId: string, roomTitle: string) {
   await this.updateOne({ _id: new MongoId(roomId) }, { $set: { roomTitle } });
+  const room = await this.findOne({ _id: roomId });
+  return room?.roomTitle;
 };
 
 roomSchema.statics.setRoomRules = async function (roomId: string, rules: Rules) {

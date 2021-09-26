@@ -23,7 +23,7 @@ export function createRoomRouter(ioServer: Server) {
     .post('/:id/', onSetRoomRules)
     .post('/:id/leave', onLeaveRoom)
     .put('/:roomid/issue/:id', onUpdateRoomIssue(ioServer))
-    .put('/:id/', onUpdateRoomTitle)
+    .put('/:roomid', onUpdateRoomTitle(ioServer))
     .delete('/:roomid/issue/:id', onDeleteRoomIssue(ioServer))
     .delete('/:id', onDeleteRoomById);
 }
