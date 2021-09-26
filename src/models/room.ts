@@ -10,7 +10,7 @@ export interface Rules {
   cardType: any[];
   newUsersEnter: boolean;
   autoRotateCardsAfterVote: boolean;
-  changeChoiseAfterCardsRotate: boolean;
+  changingCardInEnd: boolean;
   isTimerNeeded: boolean;
   roundTime: number;
 }
@@ -31,6 +31,7 @@ interface RoomCreator {
 
 export interface Room {
   id: string;
+  isGameStarted: boolean;
   roomTitle: string;
   rules: Array<Rules>;
   users: Array<RoomUser>;
@@ -54,10 +55,12 @@ export interface RoomModelStaticMethods extends Model<Room> {
   setRoomRules(roomId: string, rules: Rules): void;
   updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
+  updateGameStatus(roomId: string, status: boolean): string;
 }
 
 const roomSchema = new Schema<Room, RoomModelStaticMethods>(
   {
+    isGameStarted: { type: Boolean },
     roomTitle: { type: String },
     rules: [
       {
@@ -65,7 +68,7 @@ const roomSchema = new Schema<Room, RoomModelStaticMethods>(
         cardType: { type: Array },
         newUsersEnter: { type: Boolean },
         autoRotateCardsAfterVote: { type: Boolean },
-        changeChoiseAfterCardsRotate: { type: Boolean },
+        changingCardInEnd: { type: Boolean },
         isTimerNeeded: { type: Boolean },
         roundTime: { type: Number },
       },
@@ -181,6 +184,12 @@ roomSchema.statics.updateRoomTitle = async function (roomId: string, roomTitle: 
   await this.updateOne({ _id: new MongoId(roomId) }, { $set: { roomTitle } });
   const room = await this.findOne({ _id: roomId });
   return room?.roomTitle;
+};
+
+roomSchema.statics.updateGameStatus = async function (roomId: string, isGameStarted: boolean) {
+  await this.updateOne({ _id: new MongoId(roomId) }, { $set: { isGameStarted } });
+  const room = await this.findOne({ _id: roomId });
+  return room?.isGameStarted;
 };
 
 roomSchema.statics.setRoomRules = async function (roomId: string, rules: Rules) {

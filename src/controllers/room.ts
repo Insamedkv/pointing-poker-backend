@@ -111,6 +111,17 @@ export const onUpdateRoomTitle = (ioServer: Server) => async (req: Request, res:
   }
 };
 
+export const onUpdateGameStatus = async (req: Request, res: Response) => {
+  try {
+    const { isGameStarted } = req.body;
+    await RoomModel.updateGameStatus(req.params.id, isGameStarted);
+    // await ioServer.to(req.params.id).emit(Event.ON_TITLE_UPDATE, title);
+    return res.status(200).json('Game status updated');
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 export const onDeleteRoomById = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
@@ -142,7 +153,7 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
       cardType,
       newUsersEnter,
       autoRotateCardsAfterVote,
-      changeChoiseAfterCardsRotate,
+      changingCardInEnd,
       isTimerNeeded,
       roundTime,
     } = req.body;
@@ -151,7 +162,7 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
       cardType,
       newUsersEnter,
       autoRotateCardsAfterVote,
-      changeChoiseAfterCardsRotate,
+      changingCardInEnd,
       isTimerNeeded,
       roundTime,
     };
@@ -163,8 +174,8 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
         });
       }
     });
-    checkRoomIdIsValid(req.params.id);
-    const setRules = await RoomModel.setRoomRules(req.params.id, rules);
+    checkRoomIdIsValid(req.params.roomid);
+    const setRules = await RoomModel.setRoomRules(req.params.roomid, rules);
     return res.status(201).json(setRules);
   } catch (error: any) {
     return res.status(400).json({

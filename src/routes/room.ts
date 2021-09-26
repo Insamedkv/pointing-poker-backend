@@ -11,6 +11,7 @@ import {
   onCreateRoomIssue,
   onGetRoomUsers,
   onGetRoomCreator,
+  onUpdateGameStatus,
 } from '../controllers/room';
 
 export function createRoomRouter(ioServer: Server) {
@@ -20,7 +21,8 @@ export function createRoomRouter(ioServer: Server) {
     .get('/:id/users', onGetRoomUsers)
     .get('/:id/issue', onGetRoomIssues)
     .post('/:id/issue', onCreateRoomIssue(ioServer))
-    .post('/:id', onSetRoomRules)
+    .put('/:roomid/rules', onSetRoomRules)
+    .put('/:roomid/gamestatus', onUpdateGameStatus)
     .post('/:id/leave', onLeaveRoom)
     .put('/:roomid/issue/:id', onUpdateRoomIssue(ioServer))
     .put('/:id', onUpdateRoomTitle(ioServer))
