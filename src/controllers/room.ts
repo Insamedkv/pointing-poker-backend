@@ -103,8 +103,8 @@ export const onUpdateRoomIssue = (ioServer: Server) => async (req: Request, res:
 export const onUpdateRoomTitle = (ioServer: Server) => async (req: Request, res: Response) => {
   try {
     const { roomTitle } = req.body;
-    const title = await RoomModel.updateRoomTitle(req.params.roomid, roomTitle);
-    await ioServer.to(req.params.roomid).emit(Event.ON_TITLE_UPDATE, title);
+    const title = await RoomModel.updateRoomTitle(req.params.id, roomTitle);
+    await ioServer.to(req.params.id).emit(Event.ON_TITLE_UPDATE, title);
     return res.status(200).json('Title updated');
   } catch (error: any) {
     return res.status(400).json({ error: error.message });

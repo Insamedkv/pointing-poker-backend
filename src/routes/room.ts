@@ -20,10 +20,10 @@ export function createRoomRouter(ioServer: Server) {
     .get('/:id/users', onGetRoomUsers)
     .get('/:id/issue', onGetRoomIssues)
     .post('/:id/issue', onCreateRoomIssue(ioServer))
-    .post('/:id/', onSetRoomRules)
+    .post('/:id', onSetRoomRules)
     .post('/:id/leave', onLeaveRoom)
     .put('/:roomid/issue/:id', onUpdateRoomIssue(ioServer))
-    .put('/:roomid', onUpdateRoomTitle(ioServer))
+    .put('/:id', onUpdateRoomTitle(ioServer))
     .delete('/:roomid/issue/:id', onDeleteRoomIssue(ioServer))
     .delete('/:id', onDeleteRoomById);
 }
