@@ -55,7 +55,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   setRoomRules(roomId: string, rules: Rules): void;
   updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
-  updateGameStatus(roomId: string, status: boolean): string;
+  updateGameStatus(roomId: string, isGameStarted: boolean): string;
 }
 
 const roomSchema = new Schema<Room, RoomModelStaticMethods>(
