@@ -5,7 +5,7 @@ import { Bet } from '../types';
 
 export interface GameBet {
   content: string;
-  userId: ObjectId;
+  userId: string;
   roomId: string;
   issueId: string;
 }
@@ -22,7 +22,7 @@ const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
       type: String,
       required: true,
     },
-    userId: { type: ObjectId, required: true },
+    userId: { type: String, required: true },
     roomId: {
       type: String,
       required: true,
