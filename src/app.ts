@@ -50,13 +50,14 @@ connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
     if (socket.handshake.query && socket.handshake.query.token) {
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
-        console.log('deco', decoded!.userId);
+        // console.log('deco', decoded!.userId);
         reJoinRoom(socket.id, decoded!.userId);
         const room = await RoomModel.getRoomByUser(decoded!.userId);
-        console.log('room', room?.id);
+        // console.log('room', room?.id);
         if (room) socket.join(room?.id);
       });
     }
+
     console.log('Client connected...', socket.id);
     socket.emit('clientConnected', socket.id);
 
@@ -71,43 +72,6 @@ connectDb().then(async () => {
         console.log(err);
       }
     });
-
-    // socket.on(Event.ISSUE_CREATE, async (i: SocketIssueCreate) => {
-    //   console.log('Issue has been created');
-    //   console.log(`[message]: ${JSON.stringify(i.issue)}`);
-    //   try {
-    //     await RoomModel.createRoomIssue(i.roomId, i.issue);
-    //     const issueList = await RoomModel.getRoomIssues(i.roomId);
-    //     console.log('get from db:', issueList);
-    //     io.to(i.roomId).emit(Event.ON_ISSUE_CREATE, issueList);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
-
-    // socket.on(Event.ISSUE_DELETE, async (i: SocketIssueDelete) => {
-    //   console.log('Issue has been created');
-    //   console.log(`[message]: ${JSON.stringify(i)}`);
-    //   try {
-    //     await RoomModel.deleteRoomIssueById(i.issueId);
-    //     const issueList = await RoomModel.getRoomIssues(i.roomId);
-    //     console.log('get from db:', issueList);
-    //     io.to(i.roomId).emit(Event.ON_ISSUE_DELETE, issueList);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
-
-    // socket.on(Event.ISSUE_UPDATE, async (i: SocketIssueUpdate) => {
-    //   console.log('Issue has been updated');
-    //   console.log(`[message]: ${JSON.stringify(i)}`);
-    //   try {
-    //     const issue = await RoomModel.updateRoomIssueById(i.issueId!, i.issue);
-    //     io.to(i.roomId).emit(Event.ISSUE_UPDATE, issue);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
 
     socket.on(Event.VOTE_START, async (roomId: string) => {
       console.log('Vote has been started');
@@ -144,17 +108,6 @@ connectDb().then(async () => {
         console.log(err);
       }
     });
-
-    // socket.on(Event.SET_RULES, async (roomId: string, rules: Rules) => {
-    //   console.log('Vote has been ended');
-    //   console.log(`[message]: ${JSON.stringify(roomId)}`);
-    //   try {
-    //     const setRules = await RoomModel.setRoomRules(roomId, rules);
-    //     io.to(roomId).emit(Event.SET_RULES, setRules);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
 
     // socket.on(Event.PLAY, async () => {
     //   console.log('Title has been updated');

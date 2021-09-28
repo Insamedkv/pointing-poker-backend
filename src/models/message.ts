@@ -5,7 +5,7 @@ import { ChatMessage } from '../types';
 
 export interface Msg {
   content: string;
-  userId: string | User;
+  user: string | User;
   roomId: string;
 }
 
@@ -20,7 +20,7 @@ const messageSchema = new Schema<Msg, MessageModelStaticMethods>(
       type: String,
       required: true,
     },
-    userId: { type: String, required: true },
+    user: { type: Object, required: true },
     roomId: {
       type: String,
       required: true,
@@ -33,13 +33,14 @@ messageSchema.statics.createMsg = async function (mes: ChatMessage) {
   const user = await UserModel.getUserById(mes.userId!);
   if (!user) throw new Error('User not found');
   const message = await this.create({
-    content: mes.content, userId: user.id, roomId: mes.roomId,
+    content: mes.content, user, roomId: mes.roomId,
   });
   return message;
 };
 
 messageSchema.statics.getMsgs = async function (roomId: string) {
-  return this.find({ roomId });
+  const messsages = await this.find({ roomId });
+  return messsages;
 };
 
 export const MessageModel = model<Msg, MessageModelStaticMethods>('messageModel', messageSchema);

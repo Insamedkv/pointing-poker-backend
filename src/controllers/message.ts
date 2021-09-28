@@ -8,13 +8,9 @@ import { UserModel } from '../models/user';
 
 export const onGetMessages = async (req: any, res: Response) => {
   try {
-    const room = RoomModel.getRoomByUser(req.userId);
+    const room = await RoomModel.getRoomByUser(req.userId);
     const messages = await MessageModel.getMsgs(room.id);
-    const messagePromises = messages.map(async (message) => {
-      message.userId = await UserModel.getUserById(message.userId as string);
-    });
-    const fullTypeMessages = await Promise.all(messagePromises);
-    return res.status(200).json(fullTypeMessages);
+    return res.status(200).json(messages);
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,
@@ -36,7 +32,6 @@ export const onCreateMessage = (ioServer: Server) => async (req: any, res: Respo
       roomId: room.id,
       user,
     };
-    console.log(message);
     await MessageModel.createMsg(message);
     ioServer.to(room.id).emit(Event.MESSAGE, messageCreatorInfo);
     return res.status(201).end();

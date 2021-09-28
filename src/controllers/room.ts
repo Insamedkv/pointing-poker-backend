@@ -63,7 +63,6 @@ export const onCreateRoomIssue = (ioServer: Server) => async (req: Request, res:
     isValidFields(issueFields);
     await RoomModel.createRoomIssue(req.params.id, issueFields);
     const issueList = await RoomModel.getRoomIssues(req.params.id);
-    console.log('RoomID', req.params.id);
     await ioServer.to(req.params.id).emit(Event.ON_ISSUE_CREATE, issueList);
     return res.status(201).json('Issue created');
   } catch (error: any) {
