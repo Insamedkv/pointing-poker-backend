@@ -48,12 +48,11 @@ connectDb().then(async () => {
   //   }
   // });
   io.on(Event.CONNECT, (socket: Socket) => {
-    if (socket.handshake.query && socket.handshake.query.token) {
+    if (socket.handshake.query.token != null) {
+      console.log('token', socket.handshake.query.token);
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
-        // console.log('deco', decoded!.userId);
-        reJoinRoom(socket.id, decoded!.userId);
-        const room = await RoomModel.getRoomByUser(decoded!.userId);
-        // console.log('room', room?.id);
+        if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
+        const room = await RoomModel.getRoomByUser(decoded?.userId);
         if (room) socket.join(room?.id);
       });
     }
