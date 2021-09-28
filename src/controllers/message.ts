@@ -19,14 +19,15 @@ export const onGetMessages = async (req: any, res: Response) => {
 
 export const onCreateMessage = (ioServer: Server) => async (req: any, res: Response) => {
   try {
-    const room = RoomModel.getRoomByUser(req.userId);
+    const room = await RoomModel.getRoomByUser(req.userId);
     const message: ChatMessage = {
       content: req.body.message,
       roomId: room.id,
       userId: req.userId,
     };
+    console.log(message);
     await MessageModel.createMsg(message);
-    ioServer.to(message.roomId).emit(Event.MESSAGE, { message });
+    ioServer.to(room.id).emit(Event.MESSAGE, message);
     return res.status(201).end();
   } catch (error: any) {
     return res.status(400).json({
