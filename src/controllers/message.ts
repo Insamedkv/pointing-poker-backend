@@ -10,7 +10,11 @@ export const onGetMessages = async (req: any, res: Response) => {
   try {
     const room = RoomModel.getRoomByUser(req.userId);
     const messages = await MessageModel.getMsgs(room.id);
-    return res.status(200).json(messages);
+    const messagePromises = messages.map(async (message) => {
+      message.userId = await UserModel.getUserById(message.userId as string);
+    });
+    const fullTypeMessages = await Promise.all(messagePromises);
+    return res.status(200).json(fullTypeMessages);
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,

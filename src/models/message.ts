@@ -1,17 +1,17 @@
 import { Model, Schema, model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { UserModel } from './user';
+import { User, UserModel } from './user';
 import { ChatMessage } from '../types';
 
 export interface Msg {
   content: string;
-  userId: string;
+  userId: string | User;
   roomId: string;
 }
 
 export interface MessageModelStaticMethods extends Model<Msg> {
   createMsg(chatMessage: ChatMessage): Msg;
-  getMsgs(roomId: string): any;
+  getMsgs(roomId: string): Msg[];
 }
 
 const messageSchema = new Schema<Msg, MessageModelStaticMethods>(
