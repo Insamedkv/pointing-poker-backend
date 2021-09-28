@@ -7,6 +7,7 @@ export interface Msg {
   content: string;
   user: string | User;
   roomId: string;
+  createdAt: Date;
 }
 
 export interface MessageModelStaticMethods extends Model<Msg> {

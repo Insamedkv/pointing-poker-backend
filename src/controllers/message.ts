@@ -27,12 +27,13 @@ export const onCreateMessage = (ioServer: Server) => async (req: any, res: Respo
       roomId: room.id,
       userId: req.userId,
     };
+    const messageFromSchema = await MessageModel.createMsg(message);
     const messageCreatorInfo = {
       content: req.body.message,
       roomId: room.id,
       user,
+      createdAt: messageFromSchema.createdAt,
     };
-    await MessageModel.createMsg(message);
     ioServer.to(room.id).emit(Event.MESSAGE, messageCreatorInfo);
     return res.status(201).end();
   } catch (error: any) {
