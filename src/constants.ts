@@ -1,5 +1,6 @@
 export enum Event {
   CONNECT = 'connect',
+  DISCONNECT = 'disconnect',
   JOIN = 'join',
   ONJOIN = 'onjoin',
   MESSAGE = 'message',
@@ -21,5 +22,6 @@ export enum Event {
   VOTE_END = 'vote end',
   VOTE_RESULT = 'vote result',
   PLAY = 'play',
+  ON_PLAY = 'on play',
   SET_RULES = 'set rules',
 }

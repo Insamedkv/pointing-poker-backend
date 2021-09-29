@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import { createServer, Server as HttpServer } from 'http';
 import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
+import {
+  disconnect, reJoinRoom, UserSocket,
+} from './utils/usersSocket';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
 import { createUserRouter } from './routes/index';
@@ -14,13 +17,14 @@ import {
   Bet, ChatMessage, SocketIssueCreate, SocketIssueDelete, SocketIssueUpdate,
 } from './types';
 import { connectDb } from './config/db';
-import { joinRoom, reJoinRoom, UserSocket } from './utils/usersSocket';
+
 import { MessageModel } from './models/message';
 import { Event } from './constants';
 import { GameModel } from './models/game';
 import { Issue, RoomModel, Rules } from './models/room';
 import { onGetRoomUsers } from './controllers/room';
 import { config } from './config/db.config';
+import cloudinary from './utils/cloudinary';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
@@ -49,7 +53,6 @@ connectDb().then(async () => {
   // });
   io.on(Event.CONNECT, (socket: Socket) => {
     if (socket.handshake.query.token != null) {
-      console.log('token', socket.handshake.query.token);
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
         if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
         const room = await RoomModel.getRoomByUser(decoded?.userId);
@@ -108,17 +111,30 @@ connectDb().then(async () => {
       }
     });
 
-    // socket.on(Event.PLAY, async () => {
-    //   console.log('Title has been updated');
-    //   console.log(`[message]: ${JSON.stringify()}`);
-    //   try {
-    //     const newTitle = await RoomModel.updateRoomTitle();
-    //     io.to().emit(Event.TITLE_UPDATE, newTitle);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
-    // setRules
+    socket.on(Event.PLAY, async (roomId) => {
+      console.log('Game started');
+      try {
+        io.to(roomId).emit(Event.ON_PLAY, true);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.DISCONNECT, async () => {
+      console.log('Client disconnected');
+      try {
+        const userId = disconnect(socket.id);
+        const room = await RoomModel.getRoomByUser(userId);
+        const user = await UserModel.deleteUserById(userId);
+        await RoomModel.deleteUserFromRoomById(userId);
+        if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+        await user.remove();
+        const users = await RoomModel.getRoomUsers(room.id);
+        await socket.to(room.id).emit(Event.USER_DELETE, users);
+      } catch (err) {
+        console.log(err);
+      }
+    });
   });
 
   const PREFIX = '/api';

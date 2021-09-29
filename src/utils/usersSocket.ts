@@ -30,6 +30,16 @@ export function leaveRoom(userId: string) {
   return socketIDs;
 }
 
+export function disconnect(socketId: string) {
+  let userId = '';
+  users.forEach((user) => {
+    if (user.socketId === socketId) {
+      userId = user.userId;
+    }
+  });
+  return userId;
+}
+
 export function deleteRoom(roomId: string) {
   const socketIDs: Array<string> = [];
   users.forEach((user) => {
