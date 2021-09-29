@@ -5,6 +5,7 @@ import { MessageModel } from '../models/message';
 import { RoomModel } from '../models/room';
 import { UserModel } from '../models/user';
 import { isValidFields } from '../utils/checkIssueFields';
+import cloudinary from '../utils/cloudinary';
 import { checkRoomIdIsValid } from '../utils/userIdValidator';
 import { deleteRoom, leaveRoom } from '../utils/usersSocket';
 
@@ -186,7 +187,7 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
   }
 };
 
-export const onLeaveRoom = async (req: any, res: any) => {
+export const onLeaveRoom = (ioServer: Server) => async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const room = await RoomModel.findOne({ _id: id });
@@ -195,28 +196,36 @@ export const onLeaveRoom = async (req: any, res: any) => {
       if (userIndex < 0) {
         throw new Error('User not foound');
       } else {
-        const userDetails = await UserModel.getUserById(req.userId);
-        const sockets = await req.app.get('io').sockets.sockets;
-        const socketID = leaveRoom(req.userId);
-        const currentSocket = await sockets.get(socketID[0]);
-        await currentSocket.to(id).emit(Event.LEAVE, { userDetails, leftRoom: id });
+        // const userDetails = await UserModel.getUserById(req.userId);
+        // const roomBy = await RoomModel.getRoomByUser(req.userId);
+        const user = await UserModel.deleteUserById(req.userId);
+        await RoomModel.deleteUserFromRoomById(req.userId);
+        if (user.cloudinary_id !== null) await cloudinary.uploader.destroy(user.cloudinary_id!);
+        await user.remove();
+        const users = await RoomModel.getRoomUsers(id);
+        await ioServer.to(room.id).emit(Event.USER_DELETE, users);
+        // const sockets = await req.app.get('io').sockets.sockets;
+        leaveRoom(req.userId);
+        // const currentSocket = await sockets.get(socketID[0]);
+        // await currentSocket.to(id).emit(Event.USER_DELETE, { userDetails, leftRoom: id });
         if (room.users.length === 1) {
           await RoomModel.deleteRoomById(id);
-        } else {
-          room.users.splice(userIndex, 1);
-          await room.save();
-          const newMsg = await MessageModel.createMsg({ // ???????
-            roomId: id,
-            content: `${userDetails.firstName} left the room.`,
-          });
-          await currentSocket.to(id).emit(Event.MESSAGE, { newMsg });
-          socketID.forEach((socket) => {
-            sockets.get(socket).leave(id);
-          });
-          return res.status(200).json({
-            status: 'success',
-          });
         }
+
+        // } else {
+        //   room.users.splice(userIndex, 1);
+        //   await room.save();
+        // const newMsg = await MessageModel.createMsg({ // ???????
+        //   roomId: id,
+        //   content: `${userDetails.firstName} left the room.`,
+        // });
+        // await currentSocket.to(id).emit(Event.MESSAGE, { newMsg });
+        // socketID.forEach((socket) => {
+        //   sockets.get(socket).leave(id);
+        // });
+        return res.status(200).json({
+          status: 'success',
+        });
       }
     } else {
       throw new Error('Room not found');
