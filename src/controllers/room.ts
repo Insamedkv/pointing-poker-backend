@@ -123,7 +123,7 @@ export const onUpdateGameStatus = async (req: Request, res: Response) => {
   }
 };
 
-export const onDeleteRoomById = async (req: any, res: Response) => {
+export const onDeleteRoomById = (ioServer: Server) => async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     checkRoomIdIsValid(id);
@@ -132,11 +132,12 @@ export const onDeleteRoomById = async (req: any, res: Response) => {
     if (owner.toString() !== deleteInitiator._id.toString()) {
       throw new Error('Not enough permissions');
     }
-    const io = req.app.get('io');
-    await io.to(id).emit(Event.ROOM_DELETE, id);
+    // const io = req.app.get('io');
+    // await io.to(id).emit(Event.ROOM_DELETE, id);
     const socketIDs = deleteRoom(id);
     socketIDs.forEach((socketID) => {
-      io.sockets.sockets.get(socketID).leave(id);
+      ioServer.sockets.sockets.get(socketID)?.emit(Event.ROOM_DELETE);
+      ioServer.sockets.sockets.get(socketID)?.leave(id);
     });
     await RoomModel.deleteRoomById(id);
     return res.status(200).json({
@@ -200,7 +201,7 @@ export const onLeaveRoom = (ioServer: Server) => async (req: any, res: any) => {
         // const roomBy = await RoomModel.getRoomByUser(req.userId);
         const user = await UserModel.deleteUserById(req.userId);
         await RoomModel.deleteUserFromRoomById(req.userId);
-        if (user.cloudinary_id !== null) await cloudinary.uploader.destroy(user.cloudinary_id!);
+        if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
         await user.remove();
         const users = await RoomModel.getRoomUsers(id);
         await ioServer.to(room.id).emit(Event.USER_DELETE, users);
@@ -208,9 +209,9 @@ export const onLeaveRoom = (ioServer: Server) => async (req: any, res: any) => {
         leaveRoom(req.userId);
         // const currentSocket = await sockets.get(socketID[0]);
         // await currentSocket.to(id).emit(Event.USER_DELETE, { userDetails, leftRoom: id });
-        if (room.users.length === 1) {
-          await RoomModel.deleteRoomById(id);
-        }
+        // if (room.users.length === 1) {
+        //   await RoomModel.deleteRoomById(id);
+        // }
 
         // } else {
         //   room.users.splice(userIndex, 1);

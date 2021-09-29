@@ -27,5 +27,5 @@ export function createRoomRouter(ioServer: Server) {
     .put('/:roomid/issue/:id', onUpdateRoomIssue(ioServer))
     .put('/:id', onUpdateRoomTitle(ioServer))
     .delete('/:roomid/issue/:id', onDeleteRoomIssue(ioServer))
-    .delete('/:id', onDeleteRoomById);
+    .delete('/:id', onDeleteRoomById(ioServer));
 }

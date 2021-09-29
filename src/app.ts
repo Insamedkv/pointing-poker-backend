@@ -4,7 +4,7 @@ import { createServer, Server as HttpServer } from 'http';
 import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
 import {
-  disconnect, reJoinRoom, UserSocket,
+  disconnect, leaveRoom, reJoinRoom, UserSocket,
 } from './utils/usersSocket';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
@@ -25,6 +25,7 @@ import { Issue, RoomModel, Rules } from './models/room';
 import { onGetRoomUsers } from './controllers/room';
 import { config } from './config/db.config';
 import cloudinary from './utils/cloudinary';
+import { addToKick, isKick } from './utils/voteKickSocket';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
@@ -85,27 +86,35 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.VOTE_END, async ({ roomId, vote }) => {
+    socket.on(Event.VOTE_END, async ({ vote, userForKickId }) => {
       console.log('Vote has been ended');
-      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      console.log(`[message]: ${JSON.stringify(userForKickId)}`);
       try {
-        io.to(roomId).emit(Event.VOTE_END, vote);
+        addToKick(vote, userForKickId);
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on(Event.VOTE_RESULT, async ({ roomId, vote, userForKickId }) => {
+    socket.on(Event.VOTE_RESULT, async (userForKickId) => {
       console.log('Vote results');
-      console.log(`[message]: ${JSON.stringify(roomId)}`);
+      console.log(`[message]: ${JSON.stringify(userForKickId)}`);
       try {
-        const roomUsers = await RoomModel.getRoomUsers;
-        const numberOfUsersWithoutMaster = roomUsers.length - 1;
-        if (Math.floor(numberOfUsersWithoutMaster / 2 + 1) < vote) {
-          io.to(roomId).emit(Event.VOTE_RESULT, 'Kick rejected');
+        const room = RoomModel.getRoomByUser(userForKickId);
+        const voteResult = isKick(userForKickId);
+        if (voteResult === false) {
+          io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
+        } else {
+          const user = await UserModel.deleteUserById(userForKickId);
+          await RoomModel.deleteUserFromRoomById(userForKickId);
+          if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+          // await user.remove();
+          const users = await RoomModel.getRoomUsers(room.id);
+          const socketIDs = leaveRoom(userForKickId);
+          (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
+          await io.to(room.id).emit(Event.USER_DELETE, users);
+          io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
         }
-        const kickedUserInfo = await UserModel.deleteUserById(userForKickId);
-        io.to(roomId).emit(Event.VOTE_RESULT, `${kickedUserInfo.name} kicked from room`);
       } catch (err) {
         console.log(err);
       }
@@ -120,21 +129,21 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.DISCONNECT, async () => {
-      console.log('Client disconnected');
-      try {
-        const userId = disconnect(socket.id);
-        const room = await RoomModel.getRoomByUser(userId);
-        const user = await UserModel.deleteUserById(userId);
-        await RoomModel.deleteUserFromRoomById(userId);
-        if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
-        await user.remove();
-        const users = await RoomModel.getRoomUsers(room.id);
-        await socket.to(room.id).emit(Event.USER_DELETE, users);
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    // socket.on(Event.DISCONNECT, async () => {
+    //   console.log('Client disconnected');
+    //   try {
+    //     const userId = disconnect(socket.id);
+    //     const room = await RoomModel.getRoomByUser(userId);
+    //     const user = await UserModel.deleteUserById(userId);
+    //     await RoomModel.deleteUserFromRoomById(userId);
+    //     if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+    //     await user.remove();
+    //     const users = await RoomModel.getRoomUsers(room.id);
+    //     await socket.to(room.id).emit(Event.USER_DELETE, users);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
   });
 
   const PREFIX = '/api';
