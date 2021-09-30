@@ -26,6 +26,7 @@ import { onGetRoomUsers } from './controllers/room';
 import { config } from './config/db.config';
 import cloudinary from './utils/cloudinary';
 import { addToKick, isKick } from './utils/voteKickSocket';
+import { discon } from './utils/disconnectInterval';
 
 const PORT: string | number = process.env.PORT || 4000;
 const app = express();
@@ -53,6 +54,8 @@ connectDb().then(async () => {
   //   }
   // });
   io.on(Event.CONNECT, (socket: Socket) => {
+    let disconnectInterval;
+    clearInterval(disconnectInterval);
     if (socket.handshake.query.token != null) {
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
         if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
@@ -129,21 +132,22 @@ connectDb().then(async () => {
       }
     });
 
-    // socket.on(Event.DISCONNECT, async () => {
-    //   console.log('Client disconnected');
-    //   try {
-    //     const userId = disconnect(socket.id);
-    //     const room = await RoomModel.getRoomByUser(userId);
-    //     const user = await UserModel.deleteUserById(userId);
-    //     await RoomModel.deleteUserFromRoomById(userId);
-    //     if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
-    //     await user.remove();
-    //     const users = await RoomModel.getRoomUsers(room.id);
-    //     await socket.to(room.id).emit(Event.USER_DELETE, users);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
+    socket.on(Event.DISCONNECT, async () => {
+      console.log('Client disconnected');
+      try {
+        disconnectInterval = setTimeout(discon, 3000, socket.id, io);
+        // const userId = disconnect(socket.id);
+        // const room = await RoomModel.getRoomByUser(userId);
+        // const user = await UserModel.deleteUserById(userId);
+        // await RoomModel.deleteUserFromRoomById(userId);
+        // if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+        // await user.remove();
+        // const users = await RoomModel.getRoomUsers(room.id);
+        // await socket.to(room.id).emit(Event.USER_DELETE, users);
+      } catch (err) {
+        console.log(err);
+      }
+    });
   });
 
   const PREFIX = '/api';
