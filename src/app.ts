@@ -127,7 +127,7 @@ connectDb().then(async () => {
     socket.on(Event.PLAY, async (roomId) => {
       console.log('Game started');
       try {
-        io.to(roomId).emit(Event.ON_PLAY, true);
+        io.to(roomId).emit(Event.ON_PLAY, { isGameStarted: true, roomId });
       } catch (err) {
         console.log(err);
       }
