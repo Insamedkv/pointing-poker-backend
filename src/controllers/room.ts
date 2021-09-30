@@ -201,7 +201,7 @@ export const onLeaveRoom = (ioServer: Server) => async (req: any, res: any) => {
         // const roomBy = await RoomModel.getRoomByUser(req.userId);
         const user = await UserModel.deleteUserById(req.userId);
         await RoomModel.deleteUserFromRoomById(req.userId);
-        if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+        if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
         await user.remove();
         const users = await RoomModel.getRoomUsers(id);
         await ioServer.to(room.id).emit(Event.USER_DELETE, users);

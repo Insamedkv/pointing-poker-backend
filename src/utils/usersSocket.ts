@@ -31,13 +31,9 @@ export function leaveRoom(userId: string) {
 }
 
 export function disconnect(socketId: string) {
-  let userId = '';
-  users.forEach((user) => {
-    if (user.socketId === socketId) {
-      userId = user.userId;
-    }
-  });
-  return userId;
+  const userId = users.filter((user) => user.socketId === socketId);
+  if (userId.length === 0) return;
+  return userId[0].userId;
 }
 
 export function deleteRoom(roomId: string) {

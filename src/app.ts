@@ -66,6 +66,7 @@ connectDb().then(async () => {
 
     console.log('Client connected...', socket.id);
     socket.emit('clientConnected', socket.id);
+    const socketId = socket.id;
 
     socket.on(Event.BET, async (bet: Bet) => {
       console.log('Bet has been emitted');
@@ -110,7 +111,7 @@ connectDb().then(async () => {
         } else {
           const user = await UserModel.deleteUserById(userForKickId);
           await RoomModel.deleteUserFromRoomById(userForKickId);
-          if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+          if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
           // await user.remove();
           const users = await RoomModel.getRoomUsers(room.id);
           const socketIDs = leaveRoom(userForKickId);
@@ -135,7 +136,7 @@ connectDb().then(async () => {
     socket.on(Event.DISCONNECT, async () => {
       console.log('Client disconnected');
       try {
-        disconnectInterval = setTimeout(discon, 3000, socket.id, io);
+        disconnectInterval = setTimeout(discon, 3000, socketId, io);
         // const userId = disconnect(socket.id);
         // const room = await RoomModel.getRoomByUser(userId);
         // const user = await UserModel.deleteUserById(userId);

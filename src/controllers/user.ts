@@ -72,7 +72,7 @@ export const onDeleteUserById = (ioServer: Server) => async (req: any, res: Resp
       });
     }
     await RoomModel.deleteUserFromRoomById(id);
-    if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
+    if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
     await user.remove();
     const users = await RoomModel.getRoomUsers(room.id);
     const socketIDs = leaveRoom(id);
