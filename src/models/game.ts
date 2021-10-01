@@ -13,7 +13,7 @@ export interface GameBet {
 export interface GameModelStaticMethods extends Model<GameBet> {
   setBet(bet: Bet): GameBet;
   updateBetById(betId: string, content: string): GameBet;
-  getBets(roomId: string): GameBet[];
+  getBetsByIssueId(roomId: string): GameBet[];
 }
 
 const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
@@ -51,8 +51,8 @@ gameSchema.statics.updateBetById = async function (betId: string, content: strin
   return updatedBet!;
 };
 
-gameSchema.statics.getBets = async function (roomId: string) {
-  return this.find({ roomId });
+gameSchema.statics.getBetsByIssueId = async function (issueId: string) {
+  return this.find({ issueId });
 };
 
 export const GameModel = model<GameBet, GameModelStaticMethods>('gameModel', gameSchema);

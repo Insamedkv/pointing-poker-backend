@@ -73,8 +73,8 @@ connectDb().then(async () => {
       console.log(`[message]: ${JSON.stringify(bet)}`);
       try {
         await GameModel.setBet(bet);
-        const userDetails = await UserModel.getUserById((bet.userId)!);
-        io.to(bet.roomId).emit(Event.BET, `${userDetails.firstName} set his bet `);
+        // const userDetails = await UserModel.getUserById((bet.userId)!);
+        // io.to(bet.roomId).emit(Event.BET, `${userDetails.firstName} set his bet `);
       } catch (err) {
         console.log(err);
       }
