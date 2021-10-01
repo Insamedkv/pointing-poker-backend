@@ -133,18 +133,19 @@ connectDb().then(async () => {
       }
     });
 
+    socket.on(Event.RUN_ROUND, async (roomId) => {
+      console.log('Round started');
+      try {
+        io.to(roomId).emit(Event.ON_RUN_ROUND, { isRoundStarted: true });
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     socket.on(Event.DISCONNECT, async () => {
       console.log('Client disconnected');
       try {
         disconnectInterval = setTimeout(discon, 3000, socketId, io);
-        // const userId = disconnect(socket.id);
-        // const room = await RoomModel.getRoomByUser(userId);
-        // const user = await UserModel.deleteUserById(userId);
-        // await RoomModel.deleteUserFromRoomById(userId);
-        // if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id!);
-        // await user.remove();
-        // const users = await RoomModel.getRoomUsers(room.id);
-        // await socket.to(room.id).emit(Event.USER_DELETE, users);
       } catch (err) {
         console.log(err);
       }

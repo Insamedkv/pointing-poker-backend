@@ -9,6 +9,8 @@ export enum Event {
   KICK = 'kick',
   // UPDATE_BET = 'update bet', ??
   // ENDGAME = 'endgame',
+  RUN_ROUND = 'run round',
+  ON_RUN_ROUND = 'on run round',
   ROOM_DELETE = 'room delete',
   USER_DELETE = 'user delete',
   RULES_UPDATE = 'rules update',
