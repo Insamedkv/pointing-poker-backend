@@ -143,7 +143,7 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.STOP_ROUND, async (roomId) => {
-      console.log('Round started');
+      console.log('Round stopped');
       try {
         io.to(roomId).emit(Event.ON_STOP_ROUND);
       } catch (err) {
@@ -152,7 +152,7 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.SET_ACTIVE_ISSUE, async ({ roomId, issueId }) => {
-      console.log('Round started');
+      console.log('Issue selected');
       try {
         io.to(roomId).emit(Event.ON_SET_ACTIVE_ISSUE, issueId);
       } catch (err) {
@@ -163,7 +163,7 @@ connectDb().then(async () => {
     socket.on(Event.DISCONNECT, async () => {
       console.log('Client disconnected');
       try {
-        disconnectInterval = setTimeout(discon, 3000, socketId, io);
+        disconnectInterval = setTimeout(discon, 20000, socketId, io);
       } catch (err) {
         console.log(err);
       }
