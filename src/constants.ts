@@ -18,6 +18,8 @@ export enum Event {
   ISSUE_UPDATE = 'issue update',
   ISSUE_CREATE = 'issue create',
   ISSUE_DELETE = 'issue delete',
+  SET_ACTIVE_ISSUE = 'set active issue',
+  ON_SET_ACTIVE_ISSUE = 'on set active issue',
   ON_ISSUE_DELETE = 'on issue delete',
   ON_ISSUE_CREATE = 'on issue create',
   VOTE_START = 'vote start',
