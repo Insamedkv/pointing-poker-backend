@@ -142,6 +142,15 @@ connectDb().then(async () => {
       }
     });
 
+    socket.on(Event.STOP_ROUND, async (roomId) => {
+      console.log('Round started');
+      try {
+        io.to(roomId).emit(Event.ON_STOP_ROUND);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     socket.on(Event.SET_ACTIVE_ISSUE, async ({ roomId, issueId }) => {
       console.log('Round started');
       try {

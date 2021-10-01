@@ -11,6 +11,8 @@ export enum Event {
   // ENDGAME = 'endgame',
   RUN_ROUND = 'run round',
   ON_RUN_ROUND = 'on run round',
+  STOP_ROUND = 'stop round',
+  ON_STOP_ROUND = 'on stop round',
   ROOM_DELETE = 'room delete',
   USER_DELETE = 'user delete',
   RULES_UPDATE = 'rules update',
