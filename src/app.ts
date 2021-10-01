@@ -142,7 +142,7 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.SET_ACTIVE_ISSUE, async (roomId: string, issueId: string) => {
+    socket.on(Event.SET_ACTIVE_ISSUE, async ({ roomId, issueId }) => {
       console.log('Round started');
       try {
         io.to(roomId).emit(Event.ON_SET_ACTIVE_ISSUE, issueId);
