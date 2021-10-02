@@ -12,7 +12,7 @@ export interface GameBet {
 
 export interface GameModelStaticMethods extends Model<GameBet> {
   setAndUpdateBet(bet: Bet): GameBet;
-  updateBetById(betId: string, content: string): GameBet;
+  deleteBetsOnRestart(issueId: string): void;
   getBetsByIssueId(roomId: string): GameBet[];
 }
 
@@ -51,12 +51,9 @@ gameSchema.statics.setAndUpdateBet = async function (bet: Bet) {
   return doneBet;
 };
 
-// gameSchema.statics.updateBetById = async function (betId: string, content: string) {
-//   const bet = await this.findOne({ _id: betId });
-//   if (!bet) throw new Error('Bet not found');
-//   const updatedBet = await this.findOneAndUpdate({ _id: betId }, { content }, { new: true });
-//   return updatedBet!;
-// };
+gameSchema.statics.deleteBetsOnRestart = async function (issueId) {
+  await this.findOneAndDelete({ issueId });
+};
 
 gameSchema.statics.getBetsByIssueId = async function (issueId: string) {
   return this.find({ issueId });

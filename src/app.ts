@@ -72,6 +72,15 @@ connectDb().then(async () => {
       }
     });
 
+    socket.on(Event.RESTART_ROUND, async (issueId: string) => {
+      console.log('RESTART_ROUND');
+      try {
+        await GameModel.deleteBetsOnRestart(issueId);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     socket.on(Event.VOTE_START, async (roomId: string) => {
       console.log('Vote has been started');
       console.log(`[message]: ${JSON.stringify(roomId)}`);

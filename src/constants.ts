@@ -6,6 +6,8 @@ export enum Event {
   MESSAGE = 'message',
   LEAVE = 'leave',
   BET = 'bet',
+  RESTART_ROUND = 'restart round',
+  ON_RESTART_ROUND = 'on restart round',
   ON_BET = 'on bet',
   KICK = 'kick',
   // UPDATE_BET = 'update bet', ??
