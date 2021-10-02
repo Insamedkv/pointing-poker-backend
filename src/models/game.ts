@@ -39,7 +39,7 @@ gameSchema.statics.setAndUpdateBet = async function (bet: Bet) {
   const exisitingBet = await this.findOne({ userId: bet.userId, issueId: bet.issueId });
   if (exisitingBet) {
     console.log('Exisiting bet update');
-    await this.findOneAndUpdate(exisitingBet, { content: bet.content }, { new: true });
+    await this.findOneAndUpdate({ userId: bet.userId, issueId: bet.issueId }, { content: bet.content }, { new: true });
   } else {
     console.log('Create bet');
     await this.create({
