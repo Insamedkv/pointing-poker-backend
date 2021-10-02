@@ -6,6 +6,7 @@ export enum Event {
   MESSAGE = 'message',
   LEAVE = 'leave',
   BET = 'bet',
+  ON_BET = 'on bet',
   KICK = 'kick',
   // UPDATE_BET = 'update bet', ??
   // ENDGAME = 'endgame',

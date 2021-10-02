@@ -65,9 +65,8 @@ connectDb().then(async () => {
       console.log('Bet has been emitted');
       console.log(`[message]: ${JSON.stringify(bet)}`);
       try {
-        await GameModel.setAndUpdateBet(bet);
-        // const userDetails = await UserModel.getUserById((bet.userId)!);
-        // io.to(bet.roomId).emit(Event.BET, `${userDetails.firstName} set his bet `);
+        const doneBet = await GameModel.setAndUpdateBet(bet);
+        io.to(bet.roomId).emit(Event.ON_BET, doneBet);
       } catch (err) {
         console.log(err);
       }
