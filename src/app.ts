@@ -3,9 +3,7 @@ import jwt from 'jsonwebtoken';
 import { createServer, Server as HttpServer } from 'http';
 import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
-import {
-  disconnect, leaveRoom, reJoinRoom, UserSocket,
-} from './utils/usersSocket';
+import { leaveRoom, reJoinRoom } from './utils/usersSocket';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
 import { createUserRouter } from './routes/index';
@@ -13,16 +11,11 @@ import { createRoomRouter } from './routes/room';
 import gameRouter from './routes/game';
 import { getDelUserRouter } from './routes/user';
 import { createMessageRouter } from './routes/message';
-import {
-  Bet, ChatMessage, SocketIssueCreate, SocketIssueDelete, SocketIssueUpdate,
-} from './types';
+import { Bet } from './types';
 import { connectDb } from './config/db';
-
-import { MessageModel } from './models/message';
 import { Event } from './constants';
 import { GameModel } from './models/game';
-import { Issue, RoomModel, Rules } from './models/room';
-import { onGetRoomUsers } from './controllers/room';
+import { RoomModel } from './models/room';
 import { config } from './config/db.config';
 import cloudinary from './utils/cloudinary';
 import { addToKick, isKick } from './utils/voteKickSocket';
@@ -72,7 +65,7 @@ connectDb().then(async () => {
       console.log('Bet has been emitted');
       console.log(`[message]: ${JSON.stringify(bet)}`);
       try {
-        await GameModel.setBet(bet);
+        await GameModel.setAndUpdateBet(bet);
         // const userDetails = await UserModel.getUserById((bet.userId)!);
         // io.to(bet.roomId).emit(Event.BET, `${userDetails.firstName} set his bet `);
       } catch (err) {
