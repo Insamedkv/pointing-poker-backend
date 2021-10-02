@@ -60,7 +60,7 @@ gameSchema.statics.setAndUpdateBet = async function (bet: Bet) {
 // };
 
 gameSchema.statics.deleteBetsOnRestart = async function (issueId) {
-  await this.findOneAndDelete({ issueId });
+  await this.deleteMany({ issueId });
 };
 
 gameSchema.statics.getBetsByIssueId = async function (issueId: string) {
