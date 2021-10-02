@@ -37,17 +37,17 @@ const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
 
 gameSchema.statics.setAndUpdateBet = async function (bet: Bet) {
   const exisitingBet = await this.findOne({ userId: bet.userId, issueId: bet.issueId });
-  let doneBet;
   if (exisitingBet) {
     console.log('Exisiting bet update');
-    doneBet = await this.findOneAndUpdate({ userId: bet.userId, issueId: bet.issueId },
+    await this.findOneAndUpdate({ userId: bet.userId, issueId: bet.issueId },
       { content: bet.content }, { new: true });
   } else {
     console.log('Create bet');
-    doneBet = await this.create({
+    await this.create({
       content: bet.content, userId: bet.userId, roomId: bet.roomId, issueId: bet.issueId,
     });
   }
+  const doneBet = this.find({ issueId: bet.issueId });
   return doneBet;
 };
 
