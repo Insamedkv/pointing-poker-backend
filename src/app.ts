@@ -72,14 +72,14 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.RESTART_ROUND, async (issueId: string) => {
-      console.log('RESTART_ROUND');
-      try {
-        await GameModel.deleteBetsOnRestart(issueId);
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    // socket.on(Event.RESTART_ROUND, async (issueId: string) => {
+    //   console.log('RESTART_ROUND');
+    //   try {
+    //     await GameModel.deleteBetsOnRestart(issueId);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
 
     socket.on(Event.VOTE_START, async (roomId: string) => {
       console.log('Vote has been started');
@@ -134,9 +134,10 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.RUN_ROUND, async (roomId) => {
+    socket.on(Event.RUN_ROUND, async ({ roomId, issueId }) => {
       console.log('Round started');
       try {
+        await GameModel.deleteBetsOnRestart(issueId);
         io.to(roomId).emit(Event.ON_RUN_ROUND, { isRoundStarted: true });
       } catch (err) {
         console.log(err);
