@@ -13,7 +13,7 @@ export interface GameBet {
 export interface GameModelStaticMethods extends Model<GameBet> {
   setAndUpdateBet(bet: Bet): GameBet;
   updateBetById(betId: string, content: string): GameBet;
-  getBetsByIssueId(roomId: string): GameBet[];
+  getBetsByIssueId(issueId: string): GameBet[];
   deleteBetsOnRestart(issueId: string): void;
 }
 
