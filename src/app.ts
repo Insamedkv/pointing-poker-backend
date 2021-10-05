@@ -126,7 +126,7 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.CHANGE_OBSERVER_STATUS, async (userId: string, status: boolean) => {
+    socket.on(Event.CHANGE_OBSERVER_STATUS, async ({ userId, status }) => {
       console.log('Status changed');
       try {
         await UserModel.updateObserverStatus(userId, status);
