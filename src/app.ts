@@ -31,22 +31,6 @@ const server: HttpServer = createServer(app);
 const io: IOServer = (socketio as any)(server, { cors: { credentials: false } });
 
 connectDb().then(async () => {
-  // io.use((socket: any, next) => {
-  //   if (socket.handshake.query && socket.handshake.query.token) {
-  //     jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
-  //       if (err) return next(new Error('Authentication error'));
-  //       console.log('deco', decoded!.userId);
-  //       reJoinRoom(socket.id, decoded!.userId);
-  //       const room = await RoomModel.getRoomByUser(decoded!.userId);
-  //       console.log('room', room?.id);
-  //       if (room) socket.join(room?.id);
-  //       socket.decoded = decoded;
-  //       next();
-  //     });
-  //   } else {
-  //     next(new Error('Authentication error'));
-  //   }
-  // });
   io.on(Event.CONNECT, (socket: Socket) => {
     let disconnectInterval;
     clearInterval(disconnectInterval);
@@ -72,15 +56,6 @@ connectDb().then(async () => {
         console.log(err);
       }
     });
-
-    // socket.on(Event.RESTART_ROUND, async (issueId: string) => {
-    //   console.log('RESTART_ROUND');
-    //   try {
-    //     await GameModel.deleteBetsOnRestart(issueId);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
 
     socket.on(Event.VOTE_START, async (roomId: string) => {
       console.log('Vote has been started');
@@ -149,6 +124,15 @@ connectDb().then(async () => {
       console.log('Round stopped');
       try {
         io.to(roomId).emit(Event.ON_STOP_ROUND);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.FINISH_GAME, async (roomId) => {
+      console.log('Game finished');
+      try {
+        io.to(roomId).emit(Event.ON_FINISH_GAME);
       } catch (err) {
         console.log(err);
       }

@@ -33,4 +33,6 @@ export enum Event {
   PLAY = 'play',
   ON_PLAY = 'on play',
   SET_RULES = 'set rules',
+  FINISH_GAME = 'finish game',
+  ON_FINISH_GAME = 'finish game',
 }
