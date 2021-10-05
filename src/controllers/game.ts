@@ -4,7 +4,6 @@ import { GameModel } from '../models/game';
 export const onGetBets = async (req: Request, res: Response) => {
   try {
     const bets = await GameModel.getBetsByIssueId(req.params.id);
-    console.log('bets', bets);
     return res.status(200).json(bets);
   } catch (error: any) {
     return res.status(400).json({

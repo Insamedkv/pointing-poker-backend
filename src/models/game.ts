@@ -15,6 +15,7 @@ export interface GameModelStaticMethods extends Model<GameBet> {
   updateBetById(betId: string, content: string): GameBet;
   getBetsByIssueId(issueId: string): GameBet[];
   deleteBetsOnRestart(issueId: string): void;
+  getBetsByRoomId(roomId: string): Promise<GameBet[]>;
 }
 
 const gameSchema = new Schema<GameBet, GameModelStaticMethods>(
@@ -65,6 +66,10 @@ gameSchema.statics.deleteBetsOnRestart = async function (issueId) {
 
 gameSchema.statics.getBetsByIssueId = async function (issueId: string) {
   return this.find({ issueId });
+};
+
+gameSchema.statics.getBetsByRoomId = async function (roomId: string) {
+  return this.find({ roomId });
 };
 
 export const GameModel = model<GameBet, GameModelStaticMethods>('gameModel', gameSchema);

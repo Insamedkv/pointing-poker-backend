@@ -1,6 +1,6 @@
-import { ObjectId as MongoId } from 'mongodb';
+import { ObjectId as MongoId, ObjectId } from 'mongodb';
 import {
-  Model, Schema, model, ObjectId,
+  Model, Schema, model,
 } from 'mongoose';
 import cloudinary from '../utils/cloudinary';
 import { UserModel } from './user';
@@ -17,6 +17,7 @@ export interface Rules {
 }
 
 export interface Issue {
+  _id?: ObjectId;
   issueTitle: string;
   priority: string;
   link: string;
@@ -48,7 +49,7 @@ export interface RoomModelStaticMethods extends Model<Room> {
   getRoomUsers(roomId: string): Room;
   getRoomCreator(roomId: string): RoomCreator;
   deleteUserFromRoomById(id: string): void;
-  getRoomIssues(roomId: string): Issue[];
+  getRoomIssues(roomId: string): Promise<Issue[]>;
   createRoomIssue(roomId: string, issue: Issue): void;
   deleteRoomIssueById(issueId: string): void;
   getRoom(roomId: string): Room;
@@ -155,7 +156,7 @@ roomSchema.statics.deleteUserFromRoomById = async function (id: string) {
 };
 
 roomSchema.statics.getRoomIssues = async function (roomId: string) {
-  const room = await this.findOne({ _id: roomId });
+  const room = await this.findOne({ _id: roomId }).lean();
   if (!room) throw (new Error('Room not found'));
   return room.issues;
 };

@@ -9,6 +9,7 @@ import { UserModel } from './models/user';
 import { createUserRouter } from './routes/index';
 import { createRoomRouter } from './routes/room';
 import gameRouter from './routes/game';
+import downloadRouter from './routes/dwnld';
 import { getDelUserRouter } from './routes/user';
 import { createMessageRouter } from './routes/message';
 import { Bet } from './types';
@@ -176,6 +177,7 @@ connectDb().then(async () => {
   app.use(`${PREFIX}`, createUserRouter(io));
   app.use(decodeMiddleware);
   app.use(`${PREFIX}/game`, gameRouter);
+  app.use(`${PREFIX}/download`, downloadRouter);
   app.use(`${PREFIX}/room`, createRoomRouter(io));
   app.use(`${PREFIX}/users`, getDelUserRouter(io));
   app.use(`${PREFIX}/messages`, createMessageRouter(io));
