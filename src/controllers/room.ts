@@ -156,7 +156,7 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
       newUsersEnter,
       autoRotateCardsAfterVote,
       shortScoreType,
-      changingCardInEnd,
+      // changingCardInEnd,
       isTimerNeeded,
       roundTime,
     } = req.body;
@@ -166,7 +166,7 @@ export const onSetRoomRules = async (req: Request, res: Response) => {
       newUsersEnter,
       autoRotateCardsAfterVote,
       shortScoreType,
-      changingCardInEnd,
+      // changingCardInEnd,
       isTimerNeeded,
       roundTime,
     };
