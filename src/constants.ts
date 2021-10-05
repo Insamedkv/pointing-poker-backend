@@ -10,6 +10,7 @@ export enum Event {
   ON_RESTART_ROUND = 'on restart round',
   ON_BET = 'on bet',
   KICK = 'kick',
+  BLUR = 'blur',
   // UPDATE_BET = 'update bet', ??
   // ENDGAME = 'endgame',
   RUN_ROUND = 'run round',

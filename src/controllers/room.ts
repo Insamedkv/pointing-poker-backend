@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { Server } from 'socket.io';
 import { Event } from '../constants';
-import { MessageModel } from '../models/message';
 import { RoomModel } from '../models/room';
 import { UserModel } from '../models/user';
 import { isValidFields } from '../utils/checkIssueFields';
