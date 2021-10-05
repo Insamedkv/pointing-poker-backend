@@ -35,4 +35,5 @@ export enum Event {
   SET_RULES = 'set rules',
   FINISH_GAME = 'finish game',
   ON_FINISH_GAME = 'finish game',
+  CHANGE_OBSERVER_STATUS = 'change observer status',
 }

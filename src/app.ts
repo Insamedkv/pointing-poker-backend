@@ -47,8 +47,6 @@ connectDb().then(async () => {
     const socketId = socket.id;
 
     socket.on(Event.BET, async (bet: Bet) => {
-      console.log('Bet has been emitted');
-      console.log(`[message]: ${JSON.stringify(bet)}`);
       try {
         const doneBet = await GameModel.setAndUpdateBet(bet);
         io.to(bet.roomId).emit(Event.ON_BET, doneBet);
@@ -58,8 +56,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.VOTE_START, async (roomId: string) => {
-      console.log('Vote has been started');
-      console.log(`[message]: ${JSON.stringify(roomId)}`);
       try {
         io.to(roomId).emit(Event.VOTE_START, true);
       } catch (err) {
@@ -68,8 +64,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.VOTE_END, async ({ vote, userForKickId }) => {
-      console.log('Vote has been ended');
-      console.log(`[message]: ${JSON.stringify(userForKickId)}`);
       try {
         addToKick(vote, userForKickId);
       } catch (err) {
@@ -78,8 +72,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.VOTE_RESULT, async (userForKickId) => {
-      console.log('Vote results');
-      console.log(`[message]: ${JSON.stringify(userForKickId)}`);
       try {
         const room = RoomModel.getRoomByUser(userForKickId);
         const voteResult = isKick(userForKickId);
@@ -102,7 +94,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.PLAY, async (roomId) => {
-      console.log('Game started');
       try {
         io.to(roomId).emit(Event.ON_PLAY, { isGameStarted: true, roomId });
       } catch (err) {
@@ -111,7 +102,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.RUN_ROUND, async ({ roomId, issueId }) => {
-      console.log('Round started');
       try {
         await GameModel.deleteBetsOnRestart(issueId);
         io.to(roomId).emit(Event.ON_RUN_ROUND, { isRoundStarted: true });
@@ -121,7 +111,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.STOP_ROUND, async (roomId) => {
-      console.log('Round stopped');
       try {
         io.to(roomId).emit(Event.ON_STOP_ROUND);
       } catch (err) {
@@ -130,7 +119,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.FINISH_GAME, async (roomId) => {
-      console.log('Game finished');
       try {
         io.to(roomId).emit(Event.ON_FINISH_GAME);
       } catch (err) {
@@ -138,8 +126,16 @@ connectDb().then(async () => {
       }
     });
 
+    socket.on(Event.CHANGE_OBSERVER_STATUS, async (userId: string, status: boolean) => {
+      console.log('Status changed');
+      try {
+        await UserModel.updateObserverStatus(userId, status);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     socket.on(Event.SET_ACTIVE_ISSUE, async ({ roomId, issueId }) => {
-      console.log('Issue selected');
       try {
         io.to(roomId).emit(Event.ON_SET_ACTIVE_ISSUE, issueId);
       } catch (err) {
