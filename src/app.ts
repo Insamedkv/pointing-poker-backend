@@ -116,7 +116,8 @@ connectDb().then(async () => {
 
     socket.on(Event.FINISH_GAME, async (roomId) => {
       try {
-        io.to(roomId).emit(Event.ON_FINISH_GAME);
+        RoomModel.updateGameStatus(roomId, 'finished');
+        io.to(roomId).emit(Event.ON_FINISH_GAME, { gameStatus: 'finished' });
       } catch (err) {
         console.log(err);
       }
