@@ -69,7 +69,7 @@ connectDb().then(async () => {
         addToKick(vote, userForKickId);
         const votes = countVotes(userForKickId);
         if (votes === startUsersNumber) {
-          const room = RoomModel.getRoomByUser(userForKickId);
+          const room = await RoomModel.getRoomByUser(userForKickId);
           const voteResult = isKick(userForKickId);
           if (voteResult === false) {
             io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');

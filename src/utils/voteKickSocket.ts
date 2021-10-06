@@ -31,8 +31,7 @@ export function isKick(userId: string) {
   let dontKick = 0;
   usersForKick.forEach((user) => {
     if (user.userId === userId) {
-      if (user.vote === true) kick++;
-      dontKick++;
+      if (user.vote === true) { kick++; } else { dontKick++; }
     }
   });
   removeUserFromKickArray(userId);

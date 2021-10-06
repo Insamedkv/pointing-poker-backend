@@ -7,13 +7,10 @@ import { Event } from '../constants';
 
 export async function discon(socketId: string, socket: Socket) {
   try {
-    console.log('socketId', socketId);
     const userId = disconnect(socketId);
     if (userId === undefined) return;
-    console.log('userId', userId);
     const room = await RoomModel.getRoomByUser(userId);
     const user = await UserModel.deleteUserById(userId);
-    console.log('room', room);
     await RoomModel.deleteUserFromRoomById(userId);
     // if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
     // await user.remove();
