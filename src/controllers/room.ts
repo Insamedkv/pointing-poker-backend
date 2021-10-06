@@ -24,7 +24,7 @@ export const onGetRoom = async (req: Request, res: Response) => {
   try {
     checkRoomIdIsValid(req.params.id);
     const room = await RoomModel.getRoom(req.params.id);
-    if (!room.isGameStarted) throw new Error('Game finished already');
+    if (!room.isGameStarted) throw new Error('Game finished already!');
     return res.status(201).json(room);
   } catch (error: any) {
     return res.status(400).json({
