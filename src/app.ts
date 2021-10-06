@@ -59,8 +59,8 @@ connectDb().then(async () => {
 
     socket.on(Event.VOTE_START, async ({ roomId, player, initiator }) => {
       try {
-        const initUser = UserModel.getUserById(player);
-        const userForKick = UserModel.getUserById(initiator);
+        const initUser = await UserModel.getUserById(player);
+        const userForKick = await UserModel.getUserById(initiator);
         io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initUser });
       } catch (err) {
         console.log(err);
