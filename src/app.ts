@@ -126,7 +126,7 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.UN_BLUR, async (userId) => {
+    socket.on(Event.UN_BLUR, async ({ userId }) => {
       try {
         const userSocketId = findUserSocketByUserId(userId);
         io.sockets.sockets.get(userSocketId)?.emit(Event.ADMIT);
