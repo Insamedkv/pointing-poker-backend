@@ -1,6 +1,4 @@
 import { Model, Schema, model } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { UserModel } from './user';
 import { Bet } from '../types';
 
 export interface GameBet {
