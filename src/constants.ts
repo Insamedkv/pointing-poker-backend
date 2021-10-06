@@ -31,6 +31,7 @@ export enum Event {
   ON_ISSUE_DELETE = 'on issue delete',
   ON_ISSUE_CREATE = 'on issue create',
   VOTE_START = 'vote start',
+  ON_VOTE_START = 'on vote start',
   VOTE_END = 'vote end',
   VOTE_RESULT = 'vote result',
   PLAY = 'play',

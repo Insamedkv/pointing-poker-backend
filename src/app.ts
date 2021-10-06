@@ -55,9 +55,11 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.VOTE_START, async (roomId: string) => {
+    socket.on(Event.VOTE_START, async ({ roomId, userForKickId, initiatorId }) => {
       try {
-        io.to(roomId).emit(Event.VOTE_START, true);
+        const initiator = UserModel.getUserById(initiatorId);
+        const userForKick = UserModel.getUserById(userForKickId);
+        io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initiator });
       } catch (err) {
         console.log(err);
       }
