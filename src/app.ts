@@ -33,9 +33,11 @@ const io: IOServer = (socketio as any)(server, { cors: { credentials: false } })
 connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
     let disconnectInterval;
-    clearInterval(disconnectInterval);
+
     if (socket.handshake.query.token != null) {
+      clearInterval(disconnectInterval);
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
+        console.log('SOCKET', socket.id);
         if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
         const room = await RoomModel.getRoomByUser(decoded?.userId);
         if (room) socket.join(room?.id);
@@ -44,7 +46,7 @@ connectDb().then(async () => {
 
     console.log('Client connected...', socket.id);
     socket.emit('clientConnected', socket.id);
-    const socketId = socket.id;
+    // const socketId = socket.id;
 
     socket.on(Event.BET, async (bet: Bet) => {
       try {
@@ -55,11 +57,11 @@ connectDb().then(async () => {
       }
     });
 
-    socket.on(Event.VOTE_START, async ({ roomId, userForKickId, initiatorId }) => {
+    socket.on(Event.VOTE_START, async ({ roomId, player, initiator }) => {
       try {
-        const initiator = UserModel.getUserById(initiatorId);
-        const userForKick = UserModel.getUserById(userForKickId);
-        io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initiator });
+        const initUser = UserModel.getUserById(player);
+        const userForKick = UserModel.getUserById(initiator);
+        io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initUser });
       } catch (err) {
         console.log(err);
       }
@@ -157,7 +159,7 @@ connectDb().then(async () => {
     socket.on(Event.DISCONNECT, async () => {
       console.log('Client disconnected');
       try {
-        disconnectInterval = setTimeout(discon, 20000, socketId, io);
+        disconnectInterval = setTimeout(discon, 3000, socket.id, io);
       } catch (err) {
         console.log(err);
       }
