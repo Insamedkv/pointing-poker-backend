@@ -7,6 +7,5 @@ const router = express.Router();
 
 router
   .get('/:id', downloadResultsInRoom);
-// .put('/', onUpdateBetById);
 
 export default router;

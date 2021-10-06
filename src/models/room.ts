@@ -11,7 +11,6 @@ export interface Rules {
   newUsersEnter: boolean;
   autoRotateCardsAfterVote: boolean;
   shortScoreType: string;
-  // changingCardInEnd: boolean;
   isTimerNeeded: boolean;
   roundTime: number;
 }
@@ -71,7 +70,6 @@ const roomSchema = new Schema<Room, RoomModelStaticMethods>(
         newUsersEnter: { type: Boolean },
         autoRotateCardsAfterVote: { type: Boolean },
         shortScoreType: { type: String },
-        // changingCardInEnd: { type: Boolean },
         isTimerNeeded: { type: Boolean },
         roundTime: { type: Number },
       },

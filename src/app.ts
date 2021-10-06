@@ -68,12 +68,10 @@ connectDb().then(async () => {
       try {
         addToKick(vote, userForKickId);
         const votes = countVotes(userForKickId);
-        if (votes === startUsersNumber) {
+        if (votes === startUsersNumber - 1) {
           const room = await RoomModel.getRoomByUser(userForKickId);
           const voteResult = isKick(userForKickId);
-          if (voteResult === false) {
-            io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
-          } else {
+          if (voteResult) {
             const user = await UserModel.deleteUserById(userForKickId);
             await RoomModel.deleteUserFromRoomById(userForKickId);
             if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
@@ -81,34 +79,12 @@ connectDb().then(async () => {
             const socketIDs = leaveRoom(userForKickId);
             (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
             await io.to(room.id).emit(Event.USER_DELETE, users);
-            io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
           }
         }
       } catch (err) {
         console.log(err);
       }
     });
-
-    // socket.on(Event.VOTE_RESULT, async (userForKickId) => {
-    //   try {
-    //     const room = RoomModel.getRoomByUser(userForKickId);
-    //     const voteResult = isKick(userForKickId);
-    //     if (voteResult === false) {
-    //       io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
-    //     } else {
-    //       const user = await UserModel.deleteUserById(userForKickId);
-    //       await RoomModel.deleteUserFromRoomById(userForKickId);
-    //       if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
-    //       const users = await RoomModel.getRoomUsers(room.id);
-    //       const socketIDs = leaveRoom(userForKickId);
-    //       (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
-    //       await io.to(room.id).emit(Event.USER_DELETE, users);
-    //       io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
-    //     }
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // });
 
     socket.on(Event.PLAY, async (roomId) => {
       try {

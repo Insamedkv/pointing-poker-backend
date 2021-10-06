@@ -1,5 +1,4 @@
 import { Model, Schema, model } from 'mongoose';
-import { ObjectId } from 'mongodb';
 import { User, UserModel } from './user';
 import { ChatMessage } from '../types';
 

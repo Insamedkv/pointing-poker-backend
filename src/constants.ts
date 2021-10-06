@@ -13,8 +13,6 @@ export enum Event {
   BLUR = 'blur',
   UN_BLUR = 'un blur',
   ADMIT = 'admit',
-  // UPDATE_BET = 'update bet', ??
-  // ENDGAME = 'endgame',
   RUN_ROUND = 'run round',
   ON_RUN_ROUND = 'on run round',
   STOP_ROUND = 'stop round',

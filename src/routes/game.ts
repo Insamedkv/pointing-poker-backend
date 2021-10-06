@@ -1,12 +1,11 @@
 import express from 'express';
 import {
-  onGetBets, onUpdateBetById,
+  onGetBets,
 } from '../controllers/game';
 
 const router = express.Router();
 
 router
-  .get('/:id', onGetBets)
-  .put('/', onUpdateBetById);
+  .get('/:id', onGetBets);
 
 export default router;
