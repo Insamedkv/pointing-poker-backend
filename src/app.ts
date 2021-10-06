@@ -66,6 +66,7 @@ connectDb().then(async () => {
 
     socket.on(Event.VOTE_END, async ({ vote, userForKickId, startUsersNumber }) => {
       try {
+        setTimeout(() => { socket.removeAllListeners(Event.VOTE_END); }, 15000);
         addToKick(vote, userForKickId);
         const votes = countVotes(userForKickId);
         if (votes === startUsersNumber - 1) {
