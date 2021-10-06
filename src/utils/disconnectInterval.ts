@@ -12,8 +12,7 @@ export async function discon(socketId: string, socket: Socket) {
     const room = await RoomModel.getRoomByUser(userId);
     const user = await UserModel.deleteUserById(userId);
     await RoomModel.deleteUserFromRoomById(userId);
-    // if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
-    // await user.remove();
+    if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
     const users = await RoomModel.getRoomUsers(room.id);
     await socket.to(room.id).emit(Event.USER_DELETE, users);
   } catch (err) {
