@@ -30,7 +30,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({ credentials: false, origin: '*' }));
 const server: HttpServer = createServer(app);
-let disconnectInterval: number | undefined;
+let disconnectInterval: NodeJS.Timeout;
 const io: IOServer = (socketio as any)(server, { cors: { credentials: false } });
 
 connectDb().then(async () => {
@@ -91,7 +91,7 @@ connectDb().then(async () => {
 
     socket.on(Event.PLAY, async (roomId) => {
       try {
-        io.to(roomId).emit(Event.ON_PLAY, { gameStatus: 'started', roomId });
+        io.to(roomId).emit(Event.ON_PLAY, { gameStatus: 'true', roomId });
       } catch (err) {
         console.log(err);
       }
