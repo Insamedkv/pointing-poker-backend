@@ -28,14 +28,14 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({ credentials: false, origin: '*' }));
 const server: HttpServer = createServer(app);
+let disconnectInterval: number | undefined;
 const io: IOServer = (socketio as any)(server, { cors: { credentials: false } });
 
 connectDb().then(async () => {
   io.on(Event.CONNECT, (socket: Socket) => {
-    let disconnectInterval;
+    clearInterval(disconnectInterval);
 
     if (socket.handshake.query.token != null) {
-      clearInterval(disconnectInterval);
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
         console.log('SOCKET', socket.id);
         if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
@@ -59,8 +59,8 @@ connectDb().then(async () => {
 
     socket.on(Event.VOTE_START, async ({ roomId, player, initiator }) => {
       try {
-        const initUser = await UserModel.getUserById(player);
-        const userForKick = await UserModel.getUserById(initiator);
+        const initUser = await UserModel.getUserById(initiator);
+        const userForKick = await UserModel.getUserById(player);
         io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initUser });
       } catch (err) {
         console.log(err);
@@ -159,7 +159,7 @@ connectDb().then(async () => {
     socket.on(Event.DISCONNECT, async () => {
       console.log('Client disconnected');
       try {
-        disconnectInterval = setTimeout(discon, 3000, socket.id, io);
+        disconnectInterval = setTimeout(discon, 5000, socket.id, io);
       } catch (err) {
         console.log(err);
       }
