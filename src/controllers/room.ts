@@ -114,8 +114,8 @@ export const onUpdateRoomTitle = (ioServer: Server) => async (req: Request, res:
 
 export const onUpdateGameStatus = async (req: Request, res: Response) => {
   try {
-    const { isGameStarted } = req.body;
-    await RoomModel.updateGameStatus(req.params.roomid, isGameStarted);
+    const { gameStatus } = req.body;
+    await RoomModel.updateGameStatus(req.params.roomid, gameStatus);
     return res.status(200).json('Game status updated');
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
