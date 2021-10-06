@@ -37,7 +37,7 @@ export const onCreateUser = (ioServer: Server) => async (req: any, res: Response
       const user = await UserModel.createUser(userToCreate);
       await RoomModel.joinRoom(roomId, user.id);
       joinRoom(socketId, user.id, room.id);
-      if (room.isGameStarted === true && room.rules[0].newUsersEnter === false) {
+      if (room.gameStatus === 'started' && room.rules[0].newUsersEnter === false) {
         (ioServer.sockets.sockets.get(socketId))?.emit(Event.BLUR);
       }
       ioServer.in(socketId).socketsJoin(roomId);

@@ -32,7 +32,7 @@ interface RoomCreator {
 
 export interface Room {
   id: string;
-  isGameStarted: boolean;
+  gameStatus: string;
   roomTitle: string;
   rules: Array<Rules>;
   users: Array<RoomUser>;
@@ -56,12 +56,12 @@ export interface RoomModelStaticMethods extends Model<Room> {
   setRoomRules(roomId: string, rules: Rules): void;
   updateRoomIssueById(issueId: string, issue: Issue): Issue;
   updateRoomTitle (roomTitle: string, roomId: string): string;
-  updateGameStatus(roomId: string, isGameStarted: boolean): string;
+  updateGameStatus(roomId: string, gameStatus: string): string;
 }
 
 const roomSchema = new Schema<Room, RoomModelStaticMethods>(
   {
-    isGameStarted: { type: Boolean },
+    gameStatus: { type: String },
     roomTitle: { type: String },
     rules: [
       {
@@ -187,10 +187,10 @@ roomSchema.statics.updateRoomTitle = async function (roomId: string, roomTitle: 
   return room?.roomTitle;
 };
 
-roomSchema.statics.updateGameStatus = async function (roomId: string, isGameStarted: boolean) {
-  await this.updateOne({ _id: new MongoId(roomId) }, { $set: { isGameStarted } });
+roomSchema.statics.updateGameStatus = async function (roomId: string, gameStatus: string) {
+  await this.updateOne({ _id: new MongoId(roomId) }, { $set: { gameStatus } });
   const room = await this.findOne({ _id: roomId });
-  return room?.isGameStarted;
+  return room?.gameStatus;
 };
 
 roomSchema.statics.setRoomRules = async function (roomId: string, rules: Rules) {
