@@ -34,7 +34,6 @@ export const onCreateUser = (ioServer: Server) => async (req: any, res: Response
       checkRoomIdIsValid(roomId);
       const room = await RoomModel.getRoom(roomId);
       if (!room) throw new Error('Room not found');
-      if (!room.isGameStarted) throw new Error('Game finished already');
       const user = await UserModel.createUser(userToCreate);
       await RoomModel.joinRoom(roomId, user.id);
       joinRoom(socketId, user.id, room.id);
