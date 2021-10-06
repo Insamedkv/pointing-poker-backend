@@ -19,7 +19,7 @@ import { GameModel } from './models/game';
 import { RoomModel } from './models/room';
 import { config } from './config/db.config';
 import cloudinary from './utils/cloudinary';
-import { addToKick, isKick } from './utils/voteKickSocket';
+import { addToKick, countVotes, isKick } from './utils/voteKickSocket';
 import { discon } from './utils/disconnectInterval';
 
 const PORT: string | number = process.env.PORT || 4000;
@@ -67,31 +67,48 @@ connectDb().then(async () => {
     socket.on(Event.VOTE_END, async ({ vote, userForKickId, startUsersNumber }) => {
       try {
         addToKick(vote, userForKickId);
-      } catch (err) {
-        console.log(err);
-      }
-    });
-
-    socket.on(Event.VOTE_RESULT, async (userForKickId) => {
-      try {
-        const room = RoomModel.getRoomByUser(userForKickId);
-        const voteResult = isKick(userForKickId);
-        if (voteResult === false) {
-          io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
-        } else {
-          const user = await UserModel.deleteUserById(userForKickId);
-          await RoomModel.deleteUserFromRoomById(userForKickId);
-          if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
-          const users = await RoomModel.getRoomUsers(room.id);
-          const socketIDs = leaveRoom(userForKickId);
-          (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
-          await io.to(room.id).emit(Event.USER_DELETE, users);
-          io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
+        const votes = countVotes(userForKickId);
+        if (votes === startUsersNumber) {
+          const room = RoomModel.getRoomByUser(userForKickId);
+          const voteResult = isKick(userForKickId);
+          if (voteResult === false) {
+            io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
+          } else {
+            const user = await UserModel.deleteUserById(userForKickId);
+            await RoomModel.deleteUserFromRoomById(userForKickId);
+            if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
+            const users = await RoomModel.getRoomUsers(room.id);
+            const socketIDs = leaveRoom(userForKickId);
+            (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
+            await io.to(room.id).emit(Event.USER_DELETE, users);
+            io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
+          }
         }
       } catch (err) {
         console.log(err);
       }
     });
+
+    // socket.on(Event.VOTE_RESULT, async (userForKickId) => {
+    //   try {
+    //     const room = RoomModel.getRoomByUser(userForKickId);
+    //     const voteResult = isKick(userForKickId);
+    //     if (voteResult === false) {
+    //       io.to(room.id).emit(Event.VOTE_RESULT, 'Kick rejected');
+    //     } else {
+    //       const user = await UserModel.deleteUserById(userForKickId);
+    //       await RoomModel.deleteUserFromRoomById(userForKickId);
+    //       if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
+    //       const users = await RoomModel.getRoomUsers(room.id);
+    //       const socketIDs = leaveRoom(userForKickId);
+    //       (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
+    //       await io.to(room.id).emit(Event.USER_DELETE, users);
+    //       io.to(room.id).emit(Event.VOTE_RESULT, `${user.firstName} kicked from room`);
+    //     }
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // });
 
     socket.on(Event.PLAY, async (roomId) => {
       try {
