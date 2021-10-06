@@ -37,16 +37,12 @@ connectDb().then(async () => {
 
     if (socket.handshake.query.token != null) {
       jwt.verify(socket.handshake.query.token as string, config.API_KEY, async (err, decoded) => {
-        console.log('SOCKET', socket.id);
         if (decoded?.userId) { reJoinRoom(socket.id, decoded?.userId); }
         const room = await RoomModel.getRoomByUser(decoded?.userId);
         if (room) socket.join(room?.id);
       });
     }
-
-    console.log('Client connected...', socket.id);
     socket.emit('clientConnected', socket.id);
-    // const socketId = socket.id;
 
     socket.on(Event.BET, async (bet: Bet) => {
       try {
@@ -61,13 +57,14 @@ connectDb().then(async () => {
       try {
         const initUser = await UserModel.getUserById(initiator);
         const userForKick = await UserModel.getUserById(player);
-        io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initUser });
+        const room = await RoomModel.getRoomByUser(initiator);
+        io.to(roomId).emit(Event.ON_VOTE_START, { userForKick, initUser, startUsersNumber: room.users.length });
       } catch (err) {
         console.log(err);
       }
     });
 
-    socket.on(Event.VOTE_END, async ({ vote, userForKickId }) => {
+    socket.on(Event.VOTE_END, async ({ vote, userForKickId, startUsersNumber }) => {
       try {
         addToKick(vote, userForKickId);
       } catch (err) {
@@ -85,7 +82,6 @@ connectDb().then(async () => {
           const user = await UserModel.deleteUserById(userForKickId);
           await RoomModel.deleteUserFromRoomById(userForKickId);
           if (user.cloudinary_id) await cloudinary.uploader.destroy(user.cloudinary_id);
-          // await user.remove();
           const users = await RoomModel.getRoomUsers(room.id);
           const socketIDs = leaveRoom(userForKickId);
           (io.sockets.sockets.get(socketIDs[0]))?.emit(Event.KICK);
@@ -140,7 +136,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.CHANGE_OBSERVER_STATUS, async ({ userId, status }) => {
-      console.log('Status changed');
       try {
         await UserModel.updateObserverStatus(userId, status);
       } catch (err) {
@@ -157,7 +152,6 @@ connectDb().then(async () => {
     });
 
     socket.on(Event.DISCONNECT, async () => {
-      console.log('Client disconnected');
       try {
         disconnectInterval = setTimeout(discon, 5000, socket.id, io);
       } catch (err) {

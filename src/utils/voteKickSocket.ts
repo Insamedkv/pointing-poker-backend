@@ -10,6 +10,11 @@ export function addToKick(vote: boolean, userId: string) {
   return usersForKick;
 }
 
+// export function countVotes(userId: string) {
+//   usersForKick.push({ vote, userId });
+//   return usersForKick;
+// }
+
 export function removeUserFromKickArray(userId: string) {
   usersForKick.forEach((user, index) => {
     if (user.userId === userId) {
