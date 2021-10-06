@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { createServer, Server as HttpServer } from 'http';
 import socketio, { Server as IOServer, Socket } from 'socket.io';
 import cors from 'cors';
-import { leaveRoom, reJoinRoom } from './utils/usersSocket';
+import { findUserSocketByUserId, leaveRoom, reJoinRoom } from './utils/usersSocket';
 import { decodeMiddleware } from './middlewares/jwt';
 import { UserModel } from './models/user';
 import { createUserRouter } from './routes/index';
@@ -121,6 +121,15 @@ connectDb().then(async () => {
     socket.on(Event.FINISH_GAME, async (roomId) => {
       try {
         io.to(roomId).emit(Event.ON_FINISH_GAME);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on(Event.UN_BLUR, async (userId) => {
+      try {
+        const userSocketId = findUserSocketByUserId(userId);
+        io.sockets.sockets.get(userSocketId)?.emit(Event.ADMIT);
       } catch (err) {
         console.log(err);
       }

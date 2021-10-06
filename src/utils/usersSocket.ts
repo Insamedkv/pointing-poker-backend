@@ -11,6 +11,11 @@ export function joinRoom(socketId: string, userId: string, roomId: string) {
   return users;
 }
 
+export function findUserSocketByUserId(userId: string) {
+  const user = users.filter((userObj) => userObj.userId === userId);
+  return user[0].socketId;
+}
+
 export function reJoinRoom(socketId: string, userId: string) {
   users.forEach((user) => {
     if (user.userId === userId) {

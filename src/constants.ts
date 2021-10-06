@@ -11,6 +11,8 @@ export enum Event {
   ON_BET = 'on bet',
   KICK = 'kick',
   BLUR = 'blur',
+  UN_BLUR = 'un blur',
+  ADMIT = 'admit',
   // UPDATE_BET = 'update bet', ??
   // ENDGAME = 'endgame',
   RUN_ROUND = 'run round',

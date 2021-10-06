@@ -38,7 +38,7 @@ export const onCreateUser = (ioServer: Server) => async (req: any, res: Response
       await RoomModel.joinRoom(roomId, user.id);
       joinRoom(socketId, user.id, room.id);
       if (room.isGameStarted === true && room.rules[0].newUsersEnter === false) {
-        (ioServer.sockets.sockets.get(socketId)?.emit(Event.BLUR));
+        (ioServer.sockets.sockets.get(socketId))?.emit(Event.BLUR);
       }
       ioServer.in(socketId).socketsJoin(roomId);
       const response = await RoomModel.getRoomUsers(roomId);
@@ -50,9 +50,7 @@ export const onCreateUser = (ioServer: Server) => async (req: any, res: Response
     const authToken = await encode(user.id);
     const room = await RoomModel.createRoom(user.id);
     joinRoom(socketId, user.id, room.id);
-    console.log('roomID', room.id);
     ioServer.in(socketId).socketsJoin(room.id);
-    console.log('socketrooms', ioServer.sockets.sockets.get(socketId)?.rooms);
     return res.status(201).json({ authorization: authToken, userData: user, room });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
